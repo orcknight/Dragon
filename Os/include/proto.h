@@ -22,7 +22,6 @@ PUBLIC void disable_int();
 PUBLIC void enable_int();
 
 /* string.asm */
-PUBLIC char*	strcpy(char* dst, const char* src);
 
 /* protect.c */
 PUBLIC void	init_prot();

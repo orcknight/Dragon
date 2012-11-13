@@ -115,9 +115,11 @@
     <ClCompile Include="kernel\proc.c" />
     <ClCompile Include="kernel\protect.c" />
     <ClCompile Include="kernel\start.c" />
+    <ClCompile Include="kernel\systask.c" />
     <ClCompile Include="kernel\tty.c" />
     <ClCompile Include="kernel\vsprintf.c" />
     <ClCompile Include="lib\klib.c" />
+    <ClCompile Include="lib\misc.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

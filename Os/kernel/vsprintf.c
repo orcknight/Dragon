@@ -115,14 +115,14 @@ int vsprintf(char *buf,const char *fmt,va_list args)
 		}
 		
 		int k;
-		for(k = 0; k < ((align_nr > strlen(inner_buf)) ? (align_nr -strlen(inner_buf)):0);k++)
+		for(k = 0; k < ((align_nr > strlen(inner_buf)) ? (align_nr - strlen(inner_buf)):0);k++)
 		{
 			*p++ = cs;
 		}
 		q = inner_buf;
 		while(*q)
 		{
-			*p++ - *q++;
+			*p++ = *q++;
 		}
 	}
 

@@ -40,7 +40,7 @@ typedef struct proc {
     int priority;
 
 	u32 pid;                   /* process id passed in from MM */
-	char p_name[16];           /* name of the process */
+	char name[16];           /* name of the process */
 
 	int p_flags;		/**
 				    * process flags.

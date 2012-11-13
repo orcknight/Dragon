@@ -6,7 +6,7 @@ _NR_sendrec			equ		1
 INT_VECTOR_SYS_CALL	equ		0x90
 
 global	printx		; µ¼³ö·ûºÅ
-global	senrec
+global	sendrec
 
 bits 32
 [section .text]
@@ -17,7 +17,7 @@ bits 32
 ; ====================================================================
 ; Never call sendrec() directly, call send_recv() instead.
 sendrec:
-	mov		_NR_sendrec
+	mov		eax,_NR_sendrec
 	mov		ebx,[esp + 4] ; function
 	mov		ecx,[esp + 8] ; src_dest
 	mov		edx,[esp + 12] ; p_msg

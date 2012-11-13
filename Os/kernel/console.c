@@ -78,11 +78,11 @@ PUBLIC void out_char(CONSOLE* p_con,char ch)
 	{
 	case '\n':
 		if(p_con->cursor < p_con->original_addr +
-			p_con->v_mem_limit - SCREEN_WIDTH)
+			p_con->v_mem_limit - SCR_WIDTH)
 		{
-			p_con->cursor = p_con->original_addr + SCREEN_WIDTH *
+			p_con->cursor = p_con->original_addr + SCR_WIDTH *
 				((p_con->cursor - p_con->original_addr) /
-				SCREEN_WIDTH + 1);
+				SCR_WIDTH + 1);
 		}
 		break;
 	case '\b':
@@ -103,7 +103,7 @@ PUBLIC void out_char(CONSOLE* p_con,char ch)
 		break;
 	}
 
-	while(p_con->cursor >= p_con->current_start_addr + SCREEN_SIZE)
+	while(p_con->cursor >= p_con->current_start_addr + SCR_SIZE)
 	{
 		scroll_screen(p_con,SCR_DN);
 	}
@@ -176,14 +176,14 @@ PUBLIC void scroll_screen(CONSOLE* p_con,int direction)
 	{
 		if(p_con->current_start_addr > p_con->original_addr)
 		{
-			p_con->current_start_addr -= SCREEN_WIDTH;
+			p_con->current_start_addr -= SCR_WIDTH;
 		}
 	}
 	else if(direction == SCR_DN)
 	{
-		if(p_con->current_start_addr + SCREEN_SIZE < p_con->original_addr + p_con->v_mem_limit)
+		if(p_con->current_start_addr + SCR_SIZE < p_con->original_addr + p_con->v_mem_limit)
 		{
-			p_con->current_start_addr += SCREEN_WIDTH;
+			p_con->current_start_addr += SCR_WIDTH;
 		}
 	}
 	flush(p_con);

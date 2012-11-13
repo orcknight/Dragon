@@ -136,6 +136,11 @@ void assertion_failure(char *exp,char *file,char *base_file,int line);
 #define RECEIVE	2
 #define BOTH	3	/* BOTH = (SEND | RECEIVE) */ 
 
+/* magic chars used by `printx' */
+#define MAG_CH_PANIC	'\002'
+#define MAG_CH_ASSERT	'\003'
+
+
 /**
 *	@enum msgtype
 *	@brief MESSAGE types

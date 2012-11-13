@@ -8,7 +8,7 @@
 #define _MYOS_PROTECT_H_
 
 /* 存储段描述符/系统段描述符 */
-typedef struct s_descriptor   /* 共 8 个字节 */
+typedef struct descriptor   /* 共 8 个字节 */
 {
 	u16	limit_low;		/* Limit */
 	u16	base_low;		/* Base */

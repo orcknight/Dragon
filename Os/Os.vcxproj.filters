@@ -145,5 +145,11 @@
     <ClCompile Include="kernel\vsprintf.c">
       <Filter>kernel</Filter>
     </ClCompile>
+    <ClCompile Include="kernel\systask.c">
+      <Filter>kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\misc.c">
+      <Filter>lib</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
