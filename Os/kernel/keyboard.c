@@ -7,14 +7,15 @@
 #include "type.h"
 #include "const.h"
 #include "protect.h"
-#include "proto.h"
 #include "string.h"
+#include "fs.h"
 #include "proc.h"
-#include "global.h"
-#include "keyboard.h"
-#include "keymap.h"
 #include "tty.h"
 #include "console.h"
+#include "global.h"
+#include "proto.h"
+#include "keyboard.h"
+#include "keymap.h"
 
 PRIVATE KB_INPUT kb_in;
 

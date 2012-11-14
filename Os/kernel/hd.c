@@ -78,7 +78,7 @@ PRIVATE void init_hd()
 	printl("NrDrives:%d.\n",*pNrDrives);
 	assert(*pNrDrives);
 
-	put_irq_(AT_WINI_IRQ,hd_handler);
+	put_irq_handler(AT_WINI_IRQ,hd_handler);
 	enable_irq(CASCADE_IRQ);
 	enable_irq(AT_WINI_IRQ);
 }
@@ -162,7 +162,7 @@ PRIVATE void hd_cmd_out(struct hd_cmd* cmd)
 	 * For all commands, the host must first check if BSY=1,
 	 * and should proceed no further unless and until BSY=0
 	 */
-	if(!waitfor(STATUS_BYS,0,HD_TIMEOUT))
+	if(!waitfor(STATUS_BSY,0,HD_TIMEOUT))
 		panic("hd error.");
 
 	/* Activate the Interrupt Enable (nIEN) bit */

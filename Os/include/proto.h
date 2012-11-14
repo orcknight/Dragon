@@ -52,6 +52,10 @@ PUBLIC void clock_handler(int irq);
 PUBLIC void milli_delay(int milli_sec);
 PUBLIC void init_clock();
 
+/* kernel/hd.c */
+PUBLIC void	task_hd();
+PUBLIC void	hd_handler(int irq);
+
 /* keyboard.c */
 PUBLIC void init_keyboard();
 PUBLIC void keyboard_read(TTY* p_tty);
@@ -66,6 +70,9 @@ PUBLIC void in_process(TTY* p_tty,u32 key);
 
 /* systask.c */
 PUBLIC void task_sys();
+
+/* fs/main.c */
+PUBLIC void task_fs();
 
 /* console.c */
 PUBLIC void out_char(CONSOLE* p_con, char ch);
@@ -91,6 +98,8 @@ PUBLIC	void	reset_msg(MESSAGE* p);
 PUBLIC	void	dump_msg(const char * title, MESSAGE* m);
 PUBLIC	void	dump_proc(struct proc * p);
 PUBLIC	int	send_recv(int function, int src_dest, MESSAGE* msg);
+PUBLIC void	inform_int(int task_nr);
+
 
 /* 以下是系统调用相关 */
 

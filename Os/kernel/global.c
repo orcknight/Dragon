@@ -10,9 +10,12 @@
 #include "type.h"
 #include "const.h"
 #include "protect.h"
-#include "proto.h"
-#include "global.h"
+#include "fs.h"
+#include "tty.h"
+#include "console.h"
 #include "proc.h"
+#include "global.h"
+#include "proto.h"
 
 PUBLIC PROCESS proc_table[NR_TASKS + NR_PROCS];
 PUBLIC char task_stack[STACK_SIZE_TOTAL];
