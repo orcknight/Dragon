@@ -25,6 +25,9 @@
     <Filter Include="lib">
       <UniqueIdentifier>{80571271-1a1a-41ea-acbc-a709235c98f3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="fs">
+      <UniqueIdentifier>{e07e7609-565d-4320-a5ec-65391fb6e3dd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="boot\include\fat12hdr.inc">
@@ -101,6 +104,12 @@
     <ClInclude Include="include\console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\hd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="kernel\global.c">
@@ -150,6 +159,12 @@
     </ClCompile>
     <ClCompile Include="lib\misc.c">
       <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="kernel\hd.c">
+      <Filter>kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="fs\main.c">
+      <Filter>fs</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

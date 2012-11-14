@@ -93,7 +93,9 @@
   <ItemGroup>
     <ClInclude Include="include\console.h" />
     <ClInclude Include="include\const.h" />
+    <ClInclude Include="include\fs.h" />
     <ClInclude Include="include\global.h" />
+    <ClInclude Include="include\hd.h" />
     <ClInclude Include="include\keyboard.h" />
     <ClInclude Include="include\keymap.h" />
     <ClInclude Include="include\proc.h" />
@@ -104,9 +106,11 @@
     <ClInclude Include="include\type.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="fs\main.c" />
     <ClCompile Include="kernel\clock.c" />
     <ClCompile Include="kernel\console.c" />
     <ClCompile Include="kernel\global.c" />
+    <ClCompile Include="kernel\hd.c" />
     <ClCompile Include="kernel\i8259.c" />
     <ClCompile Include="kernel\keyboard.c" />
     <ClCompile Include="kernel\main.c" />

@@ -36,5 +36,5 @@ extern  irq_handler  irq_table[];
 extern  TTY    tty_table[];
 extern  CONSOLE  console_table[];
 
-
-
+/* FS */
+extern	struct dev_drv_map	dd_map[];
