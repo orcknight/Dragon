@@ -110,6 +110,12 @@
     <ClInclude Include="include\fs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\pci.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="kernel\global.c">
@@ -165,6 +171,9 @@
     </ClCompile>
     <ClCompile Include="fs\main.c">
       <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="kernel\pci.c">
+      <Filter>kernel</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

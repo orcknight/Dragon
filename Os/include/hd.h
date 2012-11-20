@@ -107,8 +107,8 @@ struct part_ent {
 /* Command Block Registers */
 /*	MACRO		PORT			DESCRIPTION			INPUT/OUTPUT	*/
 /*	-----		----			-----------			------------	*/
-#define REG_DATA	0x1F0		/*	Data				I/O		*/
-#define REG_FEATURES	0x1F1		/*	Features			O		*/
+#define REG_DATA	0x00		/*	Data				I/O		*/
+#define REG_FEATURES	0x01		/*	Features			O		*/
 #define REG_ERROR	REG_FEATURES	/*	Error				I		*/
 					/* 	The contents of this register are valid only when the error bit
 						(ERR) in the Status Register is set, except at drive power-up or at the
@@ -129,11 +129,11 @@ struct part_ent {
 						   |     `--------------------------------------- 6. Uncorrectable data error encountered
 						   `--------------------------------------------- 7. Bad block mark detected in the requested sector's ID field
 					*/
-#define REG_NSECTOR	0x1F2		/*	Sector Count			I/O		*/
-#define REG_LBA_LOW	0x1F3		/*	Sector Number / LBA Bits 0-7	I/O		*/
-#define REG_LBA_MID	0x1F4		/*	Cylinder Low / LBA Bits 8-15	I/O		*/
-#define REG_LBA_HIGH	0x1F5		/*	Cylinder High / LBA Bits 16-23	I/O		*/
-#define REG_DEVICE	0x1F6		/*	Drive | Head | LBA bits 24-27	I/O		*/
+#define REG_NSECTOR	0x02		/*	Sector Count			I/O		*/
+#define REG_LBA_LOW	0x03		/*	Sector Number / LBA Bits 0-7	I/O		*/
+#define REG_LBA_MID	0x04		/*	Cylinder Low / LBA Bits 8-15	I/O		*/
+#define REG_LBA_HIGH 0x05		/*	Cylinder High / LBA Bits 16-23	I/O		*/
+#define REG_DEVICE	0x06		/*	Drive | Head | LBA bits 24-27	I/O		*/
 					/*	|  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 						+-----+-----+-----+-----+-----+-----+-----+-----+
 						|  1  |  L  |  1  | DRV | HS3 | HS2 | HS1 | HS0 |
@@ -150,7 +150,7 @@ struct part_ent {
 					 	                                                            When L=0, addressing is by 'CHS' mode.
 					 	                                                            When L=1, addressing is by 'LBA' mode.
 					*/
-#define REG_STATUS	0x1F7		/*	Status				I		*/
+#define REG_STATUS	0x07		/*	Status				I		*/
 					/* 	Any pending interrupt is cleared whenever this register is read.
 						|  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 						+-----+-----+-----+-----+-----+-----+-----+-----+
@@ -199,7 +199,7 @@ struct part_ent {
 /* Control Block Registers */
 /*	MACRO		PORT			DESCRIPTION			INPUT/OUTPUT	*/
 /*	-----		----			-----------			------------	*/
-#define REG_DEV_CTRL	0x3F6		/*	Device Control			O		*/
+#define REG_DEV_CTRL	0x02		/*	Device Control			O		*/
 					/*	|  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 						+-----+-----+-----+-----+-----+-----+-----+-----+
 						| HOB |  -  |  -  |  -  |  -  |SRST |-IEN |  0  |

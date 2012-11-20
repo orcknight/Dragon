@@ -38,4 +38,7 @@ extern  TTY    tty_table[];
 extern  CONSOLE  console_table[];
 
 /* FS */
-extern	struct dev_drv_map dd_map[];
+extern	u8 *			fsbuf;
+extern	const int		FSBUF_SIZE;
+extern	struct dev_drv_map	dd_map[];
+extern  struct file_base hdd_base;

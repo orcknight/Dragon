@@ -1,38 +1,9 @@
-﻿Build started 2012/11/6 14:09:58.
+﻿Build started 2012/11/15 16:17:12.
      1>Project "F:\MyOs\Os\Os\Os.vcxproj" on node 2 (Build target(s)).
-     1>PrepareForBuild:
-         Creating directory "F:\MyOs\Os\Debug\".
-       InitializeBuildStatus:
-         Creating "Debug\Os.unsuccessfulbuild" because "AlwaysCreate" was specified.
-       ClCompile:
-         E:\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TC /analyze- /errorReport:prompt kernel\clock.c kernel\console.c kernel\global.c kernel\i8259.c kernel\keyboard.c kernel\main.c kernel\mouse.c kernel\proc.c kernel\protect.c kernel\start.c kernel\tty.c lib\klib.c
-         klib.c
-     1>f:\myos\os\os\lib\klib.c(7): fatal error C1083: Cannot open include file: 'type.h': No such file or directory
-         tty.c
-     1>f:\myos\os\os\kernel\tty.c(8): fatal error C1083: Cannot open include file: 'type.h': No such file or directory
-         start.c
-     1>f:\myos\os\os\kernel\start.c(1): fatal error C1083: Cannot open include file: 'type.h': No such file or directory
-         protect.c
-     1>f:\myos\os\os\kernel\protect.c(8): fatal error C1083: Cannot open include file: 'type.h': No such file or directory
-         proc.c
-     1>f:\myos\os\os\kernel\proc.c(8): fatal error C1083: Cannot open include file: 'type.h': No such file or directory
-         mouse.c
-     1>f:\myos\os\os\kernel\mouse.c(7): fatal error C1083: Cannot open include file: 'type.h': No such file or directory
-         main.c
-     1>f:\myos\os\os\kernel\main.c(7): fatal error C1083: Cannot open include file: 'type.h': No such file or directory
-         keyboard.c
-     1>f:\myos\os\os\kernel\keyboard.c(7): fatal error C1083: Cannot open include file: 'type.h': No such file or directory
-         i8259.c
-     1>f:\myos\os\os\kernel\i8259.c(1): fatal error C1083: Cannot open include file: 'type.h': No such file or directory
-         global.c
-     1>f:\myos\os\os\kernel\global.c(10): fatal error C1083: Cannot open include file: 'type.h': No such file or directory
-         console.c
-     1>f:\myos\os\os\kernel\console.c(14): fatal error C1083: Cannot open include file: 'type.h': No such file or directory
-         clock.c
-     1>f:\myos\os\os\kernel\clock.c(8): fatal error C1083: Cannot open include file: 'type.h': No such file or directory
-         Generating Code...
+     1>InitializeBuildStatus:
+         Touching "Debug\Os.unsuccessfulbuild".
      1>Done Building Project "F:\MyOs\Os\Os\Os.vcxproj" (Build target(s)) -- FAILED.
 
 Build FAILED.
 
-Time Elapsed 00:00:01.65
+Time Elapsed 00:00:00.79

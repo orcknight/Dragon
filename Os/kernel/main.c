@@ -23,7 +23,7 @@ PUBLIC int kernel_main()
 {
 	disp_str("------\"kernel_main\" begins--------\n");
 
-	TASK*		p_task = task_table;
+	TASK*		p_task;
 	PROCESS*	p_proc = proc_table;
 	char*		p_task_stack = task_stack + STACK_SIZE_TOTAL;
 	u16			selector_ldt = SELECTOR_LDT_FIRST;
@@ -130,7 +130,7 @@ PUBLIC int get_ticks()
 	int i = 0;
 	while(1)
 	{
-		printf("<Ticks:%x>",get_ticks());
+		//printf("<Ticks:%x>",get_ticks());
 		milli_delay(200);
 	}
  }
@@ -143,7 +143,7 @@ PUBLIC int get_ticks()
 	 int i = 0x1000;
 	 while(1)
 	 {
-		 printf("B");
+		 //printf("B");
 		 milli_delay(200);
 	 }
  }
@@ -156,7 +156,7 @@ PUBLIC int get_ticks()
 	 int i = 0x2000;
 	 while(1)
 	 {
-		 printf("C");
+		 //printf("C");
 		 milli_delay(200);
 	 }
  }

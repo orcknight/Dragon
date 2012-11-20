@@ -15,6 +15,8 @@ global	disp_str
 global	disp_color_str
 global	out_byte
 global	in_byte
+global	out_dword
+global	in_dword
 global	enable_irq
 global	disable_irq
 global	enable_int
@@ -118,6 +120,29 @@ in_byte:
 	mov		edx,[esp + 4]	;port
 	xor		eax,eax
 	in		al,dx
+	nop
+	nop
+	ret
+
+
+;===============================================================================================
+;                 void out_dword(u16 port, u32 value);
+;===============================================================================================
+out_dword:
+	mov		edx,[esp + 4] ;port
+	mov		eax,[esp + 8] ;value
+	out		dx,eax
+	nop		
+	nop
+	ret
+
+;=================================================================================================
+;                  u32 in_dword(u16 port);
+;=================================================================================================
+in_dword:
+	mov		edx,[esp + 4]	;port
+	xor		eax,eax
+	in		eax,dx
 	nop
 	nop
 	ret

@@ -224,7 +224,7 @@ hwint07:                ; Interrupt routine for irq 7 (printer)
 		pop		ecx
 		cli
 		in		al,INT_S_CTLMASK
-		and		al,~(1 << (%1 - 1))  ;  | 恢复接受当前中断
+		and		al,~(1 << (%1 - 8))  ;  | 恢复接受当前中断
 		out		INT_S_CTLMASK,al
 		ret
 %endmacro
@@ -371,6 +371,7 @@ sys_call:
 
         sti
 		push	esi
+
 		push	dword [p_proc_ready]
 		push	edx
 		push	ecx

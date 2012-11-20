@@ -14,6 +14,8 @@
 /* klib.asm */
 PUBLIC void	out_byte(u16 port, u8 value);
 PUBLIC u8	in_byte(u16 port);
+PUBLIC void out_dword(u16 port, u32 value);
+PUBLIC u32 in_dword(u16 port);
 PUBLIC void	disp_str(char * info);
 PUBLIC void	disp_color_str(char * info, int color);
 PUBLIC void disable_irq(int irq);
@@ -99,6 +101,10 @@ PUBLIC	void	dump_msg(const char * title, MESSAGE* m);
 PUBLIC	void	dump_proc(struct proc * p);
 PUBLIC	int	send_recv(int function, int src_dest, MESSAGE* msg);
 PUBLIC void	inform_int(int task_nr);
+
+
+/* pci.c */
+PUBLIC void init_pci();
 
 
 /* 以下是系统调用相关 */

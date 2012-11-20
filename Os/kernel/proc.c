@@ -133,15 +133,17 @@ PUBLIC int sys_sendrec(int function,int src_dest,MESSAGE* m,struct proc* p)
 PUBLIC int send_recv(int function,int src_dest,MESSAGE* msg)
 {
 	int ret = 0;
+
 	if(function == RECEIVE)
 		memset(msg,0,sizeof(MESSAGE));
-
 	switch (function)
 	{
 	case BOTH:
 		ret = sendrec(SEND,src_dest,msg);
 		if(ret == 0)
+		{
 			ret = sendrec(RECEIVE,src_dest,msg);
+		}
 		break;
 	case SEND:
 	case RECEIVE:
@@ -152,6 +154,7 @@ PUBLIC int send_recv(int function,int src_dest,MESSAGE* msg)
 		      (function == SEND) || (function == RECEIVE));
 		break;
 	}
+	return ret;
 }
 
 
@@ -587,7 +590,7 @@ PUBLIC void inform_int(int task_nr)
 		p->p_msg->type = HARD_INT;
 		p->p_msg = 0;
 		p->has_int_msg = 0;
-		p->p_flags &= ~RECEIVING; /* dest has received the msg */
+		p->p_flags &= ~RECEIVING; /* ~RECEIVING dest has received the msg */
 		p->p_recvfrom = NO_TASK;
 		assert(p->p_flags == 0);
 		unblock(p);

@@ -6,6 +6,8 @@
 #ifndef _MYOS_CONST_H_
 #define _MYOS_CONST_H_
 
+#include "config.h"
+
 /* the assert macro */
 #define ASSERT
 #ifdef ASSERT
@@ -120,6 +122,7 @@ void assertion_failure(char *exp,char *file,char *base_file,int line);
 #define	PRINTER_IRQ	7
 #define MOUSE_IRQ   12 /* mouse */
 #define	AT_WINI_IRQ	14	/* at winchester */
+#define AT_USE_IDE  15
 
 
 /* tasks */
@@ -129,6 +132,7 @@ void assertion_failure(char *exp,char *file,char *base_file,int line);
 #define TASK_TTY	0
 #define TASK_SYS	1
 #define TASK_HD		2
+#define TASK_FS		3
 /* #define TASK_FS	3 */
 /* #define TASK_MM	4 */
 #define ANY		(NR_TASKS + NR_PROCS + 10)
@@ -202,7 +206,7 @@ enum msgtype
 #define	DEV_FLOPPY		1
 #define	DEV_CDROM		2
 #define	DEV_HD			3
-#define	DEV_CHAR_TTY		4
+#define	DEV_CHAR_TTY	4
 #define	DEV_SCSI		5
 /* make device number from major and minor numbers */
 #define	MAJOR_SHIFT		8
@@ -210,13 +214,6 @@ enum msgtype
 /* separate major and minor numbers from device number */
 #define	MAJOR(x)		((x >> MAJOR_SHIFT) & 0xFF)
 #define	MINOR(x)		(x & 0xFF)
-
-/* device numbers of hard disk */
-#define	MINOR_hd1a		0x10
-#define	MINOR_hd2a		0x20
-#define	MINOR_hd2b		0x21
-#define	MINOR_hd3a		0x30
-#define	MINOR_hd4a		0x40
 
 #define	ROOT_DEV		MAKE_DEV(DEV_HD, MINOR_BOOT)	/* 3, 0x21 */
 
@@ -238,6 +235,14 @@ enum msgtype
 #define	MAX_PRIM		(MAX_DRIVES * NR_PRIM_PER_DRIVE - 1)
 
 #define	MAX_SUBPARTITIONS	(NR_SUB_PER_DRIVE * MAX_DRIVES)
+
+/* device numbers of hard disk */
+#define	MINOR_hd1a		0x10
+#define	MINOR_hd2a		(MINOR_hd1a + NR_SUB_PER_PART)
+#define	MINOR_hd2b		0x21
+#define	MINOR_hd3a		0x30
+#define	MINOR_hd4a		0x40
+
 
 #define	P_PRIMARY	0
 #define	P_EXTENDED	1

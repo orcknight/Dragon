@@ -24,7 +24,7 @@ OBJS		= kernel/kernel.o kernel/start.o lib/kliba.o lib/string.o \
 			  kernel/syscall.o kernel/proc.o kernel/keyboard.o \
 			  kernel/tty.o kernel/console.o kernel/mouse.o \
 			  kernel/printf.o kernel/vsprintf.o kernel/systask.o \
-			  lib/misc.o kernel/hd.o fs/main.o
+			  lib/misc.o kernel/hd.o fs/main.o kernel/pci.o
 DASMOUTPUT	= kernel.bin.asm
 
 #all phony targets
@@ -102,6 +102,8 @@ kernel/vsprintf.o: kernel/vsprintf.c
 kernel/systask.o: kernel/systask.c
 	$(CC) $(CFLAGS) -o $@ $<
 kernel/hd.o: kernel/hd.c
+	$(CC) $(CFLAGS) -o $@ $<
+kernel/pci.o: kernel/pci.c
 	$(CC) $(CFLAGS) -o $@ $<
 fs/main.o: fs/main.c
 	$(CC) $(CFLAGS) -o $@ $<
