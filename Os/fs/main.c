@@ -54,6 +54,7 @@ PRIVATE void init_fs()
 	MESSAGE driver_msg;
 	driver_msg.type = DEV_OPEN;
 	driver_msg.DEVICE = MINOR(ROOT_DEV);
+	//while(1){}
 	assert(dd_map[MAJOR(ROOT_DEV)].driver_nr != INVALID_DRIVER);
 	send_recv(BOTH, dd_map[MAJOR(ROOT_DEV)].driver_nr, &driver_msg);
 

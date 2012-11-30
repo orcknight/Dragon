@@ -1,4 +1,4 @@
-﻿Build started 2012/11/15 16:17:12.
+﻿Build started 2012/11/28 13:53:41.
      1>Project "F:\MyOs\Os\Os\Os.vcxproj" on node 2 (Build target(s)).
      1>InitializeBuildStatus:
          Touching "Debug\Os.unsuccessfulbuild".
@@ -6,4 +6,4 @@
 
 Build FAILED.
 
-Time Elapsed 00:00:00.79
+Time Elapsed 00:00:00.52

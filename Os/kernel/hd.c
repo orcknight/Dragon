@@ -202,14 +202,14 @@ PRIVATE void hd_rdwt(MESSAGE* p)
 		int bytes = min(SECTOR_SIZE, bytes_left);
 		if (p->type == DEV_READ) {
 			interrupt_wait();
-			port_read(REG_DATA+hdd_base.ata_filebase, hdbuf, SECTOR_SIZE);
+			port_read(REG_DATA, hdbuf, SECTOR_SIZE);
 			phys_copy(la, (void*)va2la(TASK_HD, hdbuf), bytes);
 		}
 		else {
 			if (!waitfor(STATUS_DRQ, STATUS_DRQ, HD_TIMEOUT))
 				panic("hd writing error.");
 
-			port_write(REG_DATA+hdd_base.ata_filebase, la, bytes);
+			port_write(REG_DATA, la, bytes);
 			interrupt_wait();
 		}
 		bytes_left -= SECTOR_SIZE;
@@ -275,7 +275,7 @@ PRIVATE void get_part_table(int drive,int sect_nr,struct part_ent* entry)
 	hd_cmd_out(&cmd);
 	interrupt_wait();
 
-	port_read(REG_DATA+hdd_base.ata_filebase, hdbuf, SECTOR_SIZE);
+	port_read(REG_DATA, hdbuf, SECTOR_SIZE);
 	memcpy(entry,
 	       hdbuf + PARTITION_TABLE_OFFSET,
 	       sizeof(struct part_ent) * NR_PART_PER_DRIVE);
@@ -408,7 +408,8 @@ PRIVATE void hd_identify(int drive)
 	hd_cmd_out(&cmd);
 	printl("--hd_identify--\n");
 	interrupt_wait();
-	port_read(REG_DATA+hdd_base.ata_filebase,hdbuf,SECTOR_SIZE);
+	printl("--interrupt_wait end--\n");
+	port_read(REG_DATA,hdbuf,SECTOR_SIZE);
 
 	print_identify_info((u16*)hdbuf);
 
@@ -480,18 +481,32 @@ PRIVATE void hd_cmd_out(struct hd_cmd* cmd)
 	 */
 	if(!waitfor(STATUS_BSY,0,HD_TIMEOUT))
 		panic("hd error.");
+	int state = in_byte(REG_STATUS);
+
+	if(state & 0x01)
+	{
+		printl("--Error--\n");
+	}
+	if(state & 0x20)
+	{
+		printl("--Device Fault--\n");
+	}
+	if((state & 0x08) == 0)
+	{
+		printl("--DRQ should be set--\n");
+	}
 
 	/* Activate the Interrupt Enable (nIEN) bit */
-	out_byte(REG_DEV_CTRL+hdd_base.ata_ctlbase,0);
+	out_byte(REG_DEV_CTRL,0);
 	/* Load required parameters in the Command Block Registers */
-	out_byte(REG_FEATURES+hdd_base.ata_filebase,cmd->features);
-	out_byte(REG_NSECTOR+hdd_base.ata_filebase,cmd->count);
-	out_byte(REG_LBA_LOW+hdd_base.ata_filebase,cmd->lba_low);
-	out_byte(REG_LBA_MID+hdd_base.ata_filebase,cmd->lba_mid);
-	out_byte(REG_LBA_HIGH + hdd_base.ata_filebase,cmd->lba_high);
-	out_byte(REG_DEVICE+hdd_base.ata_filebase,cmd->device);
+	out_byte(REG_FEATURES,cmd->features);
+	out_byte(REG_NSECTOR,cmd->count);
+	out_byte(REG_LBA_LOW,cmd->lba_low);
+	out_byte(REG_LBA_MID,cmd->lba_mid);
+	out_byte(REG_LBA_HIGH,cmd->lba_high);
+	out_byte(REG_DEVICE,cmd->device);
 	/* Write the command code to the Command Register */
-	out_byte(REG_CMD+hdd_base.ata_filebase,cmd->command);
+	out_byte(REG_CMD,cmd->command);
 }
 
 /*****************************************************************************
@@ -525,7 +540,7 @@ PRIVATE int waitfor(int mask,int val,int timeout)
 
 	while(((get_ticks() - t) * 1000 / HZ) < timeout)
 	{
-		if((in_byte(REG_STATUS+hdd_base.ata_filebase) & mask) == val)
+		if((in_byte(REG_STATUS) & mask) == val)
 		{
 			return 1;
 		}
@@ -549,7 +564,7 @@ PUBLIC void hd_handler(int irq)
 	 *   - issues a reset, or
 	 *   - writes to the Command Register.
 	 */
-	hd_status = in_byte(REG_STATUS+hdd_base.ata_filebase);
+	hd_status = in_byte(REG_STATUS);
 
 	inform_int(TASK_HD);
 }

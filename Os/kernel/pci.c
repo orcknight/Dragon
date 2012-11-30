@@ -25,7 +25,7 @@ PUBLIC void init_pci()
 	int i = 0,busNo,deviceNo,funcNo,regVal,retVal,baseAddr,innerRegVal,j;
 	u16 vendorID,devID,classCode,subClass,specialCode;
 
-	for(busNo = 0; busNo < 5 ; busNo++)
+	for(busNo = 0; busNo < 256 ; busNo++)
 	{
 		for(deviceNo = 0; deviceNo < 32; deviceNo++)
 		{
@@ -52,7 +52,7 @@ PUBLIC void init_pci()
 
 				if(classCode == 0x01 && subClass == 0x01)
 				{
-					innerRegVal = regVal +  0x10;
+					innerRegVal = regVal +  0x18;
 					out_dword(PCICONFIGREG,innerRegVal);
 					retVal = in_dword(PCIDATAREG) & 0xfffc;
 					if(retVal == 0x01 || retVal == 0x00)
@@ -60,7 +60,7 @@ PUBLIC void init_pci()
 					else
 						hdd_base.ata_filebase = retVal;
 					printl("File Base:--0x%x--\n",hdd_base.ata_filebase);
-					innerRegVal = regVal +  0x14;
+					innerRegVal = regVal +  0x1C;
 					out_dword(PCICONFIGREG,innerRegVal);
 					retVal = in_dword(PCIDATAREG) & 0xfffc;
 					if(retVal == 0x01 || retVal == 0x00)
@@ -70,21 +70,24 @@ PUBLIC void init_pci()
 					printl("Ctl Base:--0x%x--\n",hdd_base.ata_ctlbase);
 					innerRegVal = regVal + 0x3c;
 					out_dword(PCICONFIGREG,innerRegVal);
-					out_dword(PCIDATAREG,0x14);
+					out_dword(PCIDATAREG,0xFE);
+					out_dword(PCICONFIGREG,innerRegVal);
 					retVal = in_dword(PCIDATAREG);
 					if( (retVal & 0xFF) == 0xFE)
 					{
-					}else
+						printl("The Device needs IRQ assignment.\n");
+					}
+					else
 					{
-						if(specialCode == 0x8A && specialCode == 0x80)
+						if(specialCode == 0x8A || specialCode == 0x80)
 						{
-							printl("Parallel IDE Controller which uses IRQs 14 and 15.\n");
+							printl("this is a PATA\n");
 						}
 					}
 					printl("irq:--0x%x--\n",retVal & 0xff);
 					printl("--busNo:%d,DeviceNo:%d,funcNo:%d--\n",busNo,deviceNo,funcNo);
+					retVal = in_byte(REG_STATUS+hdd_base.ata_filebase);
 					i++;
-					return;
 				}
 				if(funcNo == 0)    // 如果是单功能设备，则不再查funcNo>0的设备
 				{

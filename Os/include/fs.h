@@ -181,6 +181,7 @@ struct file_desc {
 struct file_base {
 	int		ata_filebase;
 	int		ata_ctlbase;
+	int		ata_irq;
 };
 
 /**
