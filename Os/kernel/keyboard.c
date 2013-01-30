@@ -1,7 +1,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                             keyboard.c
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                                                    ppx, 2012
+                                                    Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "type.h"
@@ -17,9 +17,9 @@
 #include "keyboard.h"
 #include "keymap.h"
 
-PRIVATE KB_INPUT kb_in;
+PRIVATE KB_INPUT	kb_in;
 
-PRIVATE	int	code_with_E0 = 0;
+PRIVATE	int	code_with_E0;
 PRIVATE	int	shift_l;	/* l shift state */
 PRIVATE	int	shift_r;	/* r shift state */
 PRIVATE	int	alt_l;		/* l alt state	 */
@@ -31,10 +31,14 @@ PRIVATE	int	num_lock;	/* Num Lock	 */
 PRIVATE	int	scroll_lock;	/* Scroll Lock	 */
 PRIVATE	int	column;
 
-PRIVATE u8 get_byte_from_kbuf();
-PRIVATE void kb_wait();
-PRIVATE void kb_ack();
-PRIVATE void set_leds();
+PRIVATE int	caps_lock;	/* Caps Lock	 */
+PRIVATE int	num_lock;	/* Num Lock	 */
+PRIVATE int	scroll_lock;	/* Scroll Lock	 */
+
+PRIVATE u8	get_byte_from_kbuf();
+PRIVATE void    set_leds();
+PRIVATE void    kb_wait();
+PRIVATE void    kb_ack();
 
 /*======================================================================*
                             keyboard_handler
@@ -43,12 +47,10 @@ PUBLIC void keyboard_handler(int irq)
 {
 	u8 scan_code = in_byte(KB_DATA);
 
-	if(kb_in.count < KB_IN_BYTES)
-	{
+	if (kb_in.count < KB_IN_BYTES) {
 		*(kb_in.p_head) = scan_code;
 		kb_in.p_head++;
-		if(kb_in.p_head == kb_in.buf + KB_IN_BYTES)
-		{
+		if (kb_in.p_head == kb_in.buf + KB_IN_BYTES) {
 			kb_in.p_head = kb_in.buf;
 		}
 		kb_in.count++;
@@ -64,18 +66,14 @@ PUBLIC void init_keyboard()
 	kb_in.count = 0;
 	kb_in.p_head = kb_in.p_tail = kb_in.buf;
 
-	//shift_l = shift_r = 0;
-	//alt_l   = alt_r   = 0;
-	//ctrl_l  = ctrl_r = 0;
-
 	caps_lock   = 0;
 	num_lock    = 1;
 	scroll_lock = 0;
 
 	set_leds();
 
-	put_irq_handler(KEYBOARD_IRQ,keyboard_handler); /*…Ë∂®º¸≈Ã÷–∂œ¥¶¿Ì≥Ã–Ú*/
-	enable_irq(KEYBOARD_IRQ);                       /*ø™º¸≈Ã÷–∂œ*/
+        put_irq_handler(KEYBOARD_IRQ, keyboard_handler);/*ËÆæÂÆöÈîÆÁõò‰∏≠Êñ≠Â§ÑÁêÜÁ®ãÂ∫è*/
+        enable_irq(KEYBOARD_IRQ);                       /*ÂºÄÈîÆÁõò‰∏≠Êñ≠*/
 }
 
 
@@ -84,47 +82,39 @@ PUBLIC void init_keyboard()
 *======================================================================*/
 PUBLIC void keyboard_read(TTY* p_tty)
 {
-	u8 scan_code;
-	char output[2];
-	int make;  /* TRUE: make; FALSE: break; */
+	u8	scan_code;
+	int	make;	/* 1: make;  0: break. */
 
-	
-	u32	key = 0;/* ”√“ª∏ˆ’˚–Õ¿¥±Ì æ“ª∏ˆº¸°£±»»Á£¨»Áπ˚ Home ±ª∞¥œ¬£¨
-			 * ‘Ú key ÷µΩ´Œ™∂®“Â‘⁄ keyboard.h ÷–µƒ 'HOME'°£*/
+	u32	key = 0;/* Áî®‰∏Ä‰∏™Êï¥ÂûãÊù•Ë°®Á§∫‰∏Ä‰∏™ÈîÆ„ÄÇÊØîÂ¶ÇÔºåÂ¶ÇÊûú Home Ë¢´Êåâ‰∏ãÔºå
+			 * Âàô key ÂÄºÂ∞Ü‰∏∫ÂÆö‰πâÂú® keyboard.h ‰∏≠ÁöÑ 'HOME'„ÄÇ
+			 */
+	u32*	keyrow;	/* ÊåáÂêë keymap[] ÁöÑÊüê‰∏ÄË°å */
 
-	u32*	keyrow;	/* ÷∏œÚ keymap[] µƒƒ≥“ª–– */
-
-	if(kb_in.count > 0)
-	{
+	if(kb_in.count > 0){
 		code_with_E0 = 0;
 
 		scan_code = get_byte_from_kbuf();
 
-		/* œ¬√Êø™ ºΩ‚Œˆ…®√Ë¬Î */
-		if(scan_code == 0xE1)
-		{
+		/* ‰∏ãÈù¢ÂºÄÂßãËß£ÊûêÊâ´ÊèèÁ†Å */
+		if (scan_code == 0xE1) {
 			int i;
-			u8 pausebrk_scode[] = {0xE1,0x1D,0x45,
-				0xE1,0x9D,0xC5 };
+			u8 pausebrk_scode[] = {0xE1, 0x1D, 0x45,
+					       0xE1, 0x9D, 0xC5};
 			int is_pausebreak = 1;
-			for(i=1;i<6;i++)
-			{
-				if(get_byte_from_kbuf() != pausebrk_scode[i])
-				{
+			for(i=1;i<6;i++){
+				if (get_byte_from_kbuf() != pausebrk_scode[i]) {
 					is_pausebreak = 0;
 					break;
 				}
 			}
-			if(is_pausebreak)
-			{
+			if (is_pausebreak) {
 				key = PAUSEBREAK;
 			}
 		}
-		else if(scan_code == 0xE0)
-		{
+		else if (scan_code == 0xE0) {
 			scan_code = get_byte_from_kbuf();
 
-			/* PrintScreen ±ª∞¥œ¬ */
+			/* PrintScreen Ë¢´Êåâ‰∏ã */
 			if (scan_code == 0x2A) {
 				if (get_byte_from_kbuf() == 0xE0) {
 					if (get_byte_from_kbuf() == 0x37) {
@@ -133,7 +123,7 @@ PUBLIC void keyboard_read(TTY* p_tty)
 					}
 				}
 			}
-			/* PrintScreen ±ª Õ∑≈ */
+			/* PrintScreen Ë¢´ÈáäÊîæ */
 			if (scan_code == 0xB7) {
 				if (get_byte_from_kbuf() == 0xE0) {
 					if (get_byte_from_kbuf() == 0xAA) {
@@ -142,46 +132,37 @@ PUBLIC void keyboard_read(TTY* p_tty)
 					}
 				}
 			}
-
-			/* ≤ª «PrintScreen, ¥À ±scan_codeŒ™0xE0ΩÙ∏˙µƒƒ«∏ˆ÷µ. */
-			if(key == 0)
-			{
+			/* ‰∏çÊòØPrintScreen, Ê≠§Êó∂scan_code‰∏∫0xE0Á¥ßË∑üÁöÑÈÇ£‰∏™ÂÄº. */
+			if (key == 0) {
 				code_with_E0 = 1;
 			}
-
 		}
-
-		if((key != PAUSEBREAK) && (key != PRINTSCREEN))
-		{
-			/*  ◊œ»≈–∂œMake Code ªπ « Break Code */
+		if ((key != PAUSEBREAK) && (key != PRINTSCREEN)) {
+			/* È¶ñÂÖàÂà§Êñ≠Make Code ËøòÊòØ Break Code */
 			make = (scan_code & FLAG_BREAK ? 0 : 1);
-			/* œ»∂®ŒªµΩ keymap ÷–µƒ–– */
+
+			/* ÂÖàÂÆö‰ΩçÂà∞ keymap ‰∏≠ÁöÑË°å */
 			keyrow = &keymap[(scan_code & 0x7F) * MAP_COLS];
+
 			column = 0;
 
 			int caps = shift_l || shift_r;
-			if(caps_lock)
-			{
-				if( (keyrow[0] >= 'a') && (keyrow[0] <= 'z'))
-				{
+			if (caps_lock) {
+				if ((keyrow[0] >= 'a') && (keyrow[0] <= 'z')){
 					caps = !caps;
 				}
 			}
-
-			if(caps)
-			{
+			if (caps) {
 				column = 1;
 			}
 
-			if(code_with_E0)
-			{
+			if (code_with_E0) {
 				column = 2;
 			}
 
 			key = keyrow[column];
 
-			switch(key)
-			{
+			switch(key) {
 			case SHIFT_L:
 				shift_l = make;
 				break;
@@ -198,25 +179,22 @@ PUBLIC void keyboard_read(TTY* p_tty)
 				alt_l = make;
 				break;
 			case ALT_R:
-				alt_r = make;
+				alt_l = make;
 				break;
 			case CAPS_LOCK:
-				if(make)
-				{
-					caps_lock = !caps_lock;
+				if (make) {
+					caps_lock   = !caps_lock;
 					set_leds();
 				}
 				break;
 			case NUM_LOCK:
-				if(make)
-				{
-					num_lock = !num_lock;
+				if (make) {
+					num_lock    = !num_lock;
 					set_leds();
 				}
 				break;
 			case SCROLL_LOCK:
-				if(make)
-				{
+				if (make) {
 					scroll_lock = !scroll_lock;
 					set_leds();
 				}
@@ -225,17 +203,13 @@ PUBLIC void keyboard_read(TTY* p_tty)
 				break;
 			}
 
-			/* »Áπ˚ «Make Code æÕ¥Ú”°£¨ « Break Code ‘Ú≤ª◊ˆ¥¶¿Ì */
-			if(make)
-			{
-				/* ∫ˆ¬‘ Break Code */
+			if (make) { /* ÂøΩÁï• Break Code */
 				int pad = 0;
-				/*  ◊œ»¥¶¿Ì–°º¸≈Ã */
-				if( (key >= PAD_SLASH) && (key <= PAD_9))
-				{
+
+				/* È¶ñÂÖàÂ§ÑÁêÜÂ∞èÈîÆÁõò */
+				if ((key >= PAD_SLASH) && (key <= PAD_9)) {
 					pad = 1;
-					switch(key)
-					{
+					switch(key) {
 					case PAD_SLASH:
 						key = '/';
 						break;
@@ -252,21 +226,17 @@ PUBLIC void keyboard_read(TTY* p_tty)
 						key = ENTER;
 						break;
 					default:
-						if(num_lock &&
-							(key >= PAD_0) &&
-							(key <= PAD_9))
-						{
+						if (num_lock &&
+						    (key >= PAD_0) &&
+						    (key <= PAD_9)) {
 							key = key - PAD_0 + '0';
 						}
-						else if(num_lock &&
-							(key == PAD_DOT))
-						{
+						else if (num_lock &&
+							 (key == PAD_DOT)) {
 							key = '.';
 						}
-						else
-						{
-							switch(key)
-							{
+						else{
+							switch(key) {
 							case PAD_HOME:
 								key = HOME;
 								break;
@@ -304,82 +274,80 @@ PUBLIC void keyboard_read(TTY* p_tty)
 						break;
 					}
 				}
+
 				key |= shift_l	? FLAG_SHIFT_L	: 0;
 				key |= shift_r	? FLAG_SHIFT_R	: 0;
 				key |= ctrl_l	? FLAG_CTRL_L	: 0;
 				key |= ctrl_r	? FLAG_CTRL_R	: 0;
 				key |= alt_l	? FLAG_ALT_L	: 0;
 				key |= alt_r	? FLAG_ALT_R	: 0;
-				key |= pad		? FLAG_PAD      : 0;
-			
-				in_process(p_tty,key);
+				key |= pad      ? FLAG_PAD      : 0;
+
+				in_process(p_tty, key);
 			}
-		}		
+		}
 	}
 }
-
 
 /*======================================================================*
 			    get_byte_from_kbuf
  *======================================================================*/
-PRIVATE u8 get_byte_from_kbuf()   /* ¥”º¸≈Ãª∫≥Â«¯÷–∂¡»°œ¬“ª∏ˆ◊÷Ω⁄ */
+PRIVATE u8 get_byte_from_kbuf()       /* ‰ªéÈîÆÁõòÁºìÂÜ≤Âå∫‰∏≠ËØªÂèñ‰∏ã‰∏Ä‰∏™Â≠óËäÇ */
 {
-	u8 scan_code;
+        u8 scan_code;
 
-	while(kb_in.count <= 0) {}  /* µ»¥˝œ¬“ª∏ˆ◊÷Ω⁄µΩ¿¥ */
+        while (kb_in.count <= 0) {}   /* Á≠âÂæÖ‰∏ã‰∏Ä‰∏™Â≠óËäÇÂà∞Êù• */
 
-	disable_int();
-	scan_code = *(kb_in.p_tail);
-	kb_in.p_tail++;
-	if(kb_in.p_tail == kb_in.buf + KB_IN_BYTES)
-	{
-		kb_in.p_tail = kb_in.buf;
-	}
-	kb_in.count--;
-	enable_int();
+        disable_int();
+        scan_code = *(kb_in.p_tail);
+        kb_in.p_tail++;
+        if (kb_in.p_tail == kb_in.buf + KB_IN_BYTES) {
+                kb_in.p_tail = kb_in.buf;
+        }
+        kb_in.count--;
+        enable_int();
 
 	return scan_code;
 }
 
-
 /*======================================================================*
-			   kb_wait
+				 kb_wait
  *======================================================================*/
- PRIVATE void kb_wait()  /* µ»¥˝ 8042 µƒ ‰»Îª∫≥Â«¯ø’ */
+PRIVATE void kb_wait()	/* Á≠âÂæÖ 8042 ÁöÑËæìÂÖ•ÁºìÂÜ≤Âå∫Á©∫ */
 {
 	u8 kb_stat;
 
-	do
-	{
+	do {
 		kb_stat = in_byte(KB_CMD);
-	}
-	while(kb_stat & 0x02);
+	} while (kb_stat & 0x02);
 }
 
- /*======================================================================*
-			   kb_ack
- *======================================================================*/
- PRIVATE void kb_ack()
- {
-	 u8 kb_read;
-	 do
-	 {
-		 kb_read = in_byte(KB_DATA);
-	 }
-	 while(kb_read != KB_ACK);
- }
 
- /*======================================================================*
-			   set_leds
+/*======================================================================*
+				 kb_ack
  *======================================================================*/
- PRIVATE void set_leds()
- {
-	 u8 leds = (caps_lock << 2) | (num_lock << 1) | scroll_lock;
+PRIVATE void kb_ack()
+{
+	u8 kb_read;
 
-	 kb_wait();
-	 out_byte(KB_DATA,LED_CODE);
-	 kb_ack();
-	 kb_wait();
-	 out_byte(KB_DATA,leds);
-	 kb_ack();
- }
+	do {
+		kb_read = in_byte(KB_DATA);
+	} while (kb_read != KB_ACK);
+}
+
+/*======================================================================*
+				 set_leds
+ *======================================================================*/
+PRIVATE void set_leds()
+{
+	u8 leds = (caps_lock << 2) | (num_lock << 1) | scroll_lock;
+
+	kb_wait();
+	out_byte(KB_DATA, LED_CODE);
+	kb_ack();
+
+	kb_wait();
+	out_byte(KB_DATA, leds);
+	kb_ack();
+}
+

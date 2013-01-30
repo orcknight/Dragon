@@ -22,9 +22,9 @@ OBJS		= kernel/kernel.o kernel/start.o lib/kliba.o lib/string.o \
 			  kernel/i8259.o kernel/global.o kernel/protect.o \
 			  lib/klib.o kernel/main.o kernel/clock.o \
 			  kernel/syscall.o kernel/proc.o kernel/keyboard.o \
-			  kernel/tty.o kernel/console.o kernel/mouse.o \
+			  kernel/tty.o kernel/console.o  \
 			  kernel/printf.o kernel/vsprintf.o kernel/systask.o \
-			  lib/misc.o kernel/hd.o fs/main.o kernel/pci.o
+			  lib/misc.o kernel/hd.o fs/main.o 
 DASMOUTPUT	= kernel.bin.asm
 
 #all phony targets
@@ -93,8 +93,8 @@ kernel/tty.o: kernel/tty.c
 	$(CC) $(CFLAGS) -o $@ $<
 kernel/console.o: kernel/console.c
 	$(CC) $(CFLAGS) -o $@ $<
-kernel/mouse.o: kernel/mouse.c
-	$(CC) $(CFLAGS) -o $@ $<
+#kernel/mouse.o: kernel/mouse.c
+#	$(CC) $(CFLAGS) -o $@ $<
 kernel/printf.o: kernel/printf.c
 	$(CC) $(CFLAGS) -o $@ $<
 kernel/vsprintf.o: kernel/vsprintf.c

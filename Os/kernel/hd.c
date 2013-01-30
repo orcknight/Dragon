@@ -1,9 +1,10 @@
 /*************************************************************************//**
  *****************************************************************************
  * @file   hd.c
- * @brief  HD driver.
- * @author ppx
- * @date   2012
+ * @brief  Hard disk (winchester) driver.
+ * The `device nr' in this file means minor device nr.
+ * @author Forrest Y. Yu
+ * @date   2005~2008
  *****************************************************************************
  *****************************************************************************/
 
@@ -20,27 +21,27 @@
 #include "hd.h"
 
 
-PRIVATE void init_hd();
-PRIVATE void hd_open(int device);
-PRIVATE void hd_close(int device);
-PRIVATE void hd_rdwt(MESSAGE* p);
-PRIVATE void hd_ioctl(MESSAGE* p);
-PRIVATE void hd_cmd_out(struct hd_cmd* cmd);
-PRIVATE void get_part_table(int drive,int sect_nr,struct part_ent* entry);
-PRIVATE void partition(int device,int style);
-PRIVATE void print_hdinfo(struct hd_info* hdi);
-PRIVATE int waitfor(int mask,int val,int timeout);
-PRIVATE void interrupt_wait();
-PRIVATE void hd_identify(int drive);
-PRIVATE void print_identify_info(u16* hdinfo);
+PRIVATE void	init_hd			();
+PRIVATE void	hd_open			(int device);
+PRIVATE void	hd_close		(int device);
+PRIVATE void	hd_rdwt			(MESSAGE * p);
+PRIVATE void	hd_ioctl		(MESSAGE * p);
+PRIVATE void	hd_cmd_out		(struct hd_cmd* cmd);
+PRIVATE void	get_part_table		(int drive, int sect_nr, struct part_ent * entry);
+PRIVATE void	partition		(int device, int style);
+PRIVATE void	print_hdinfo		(struct hd_info * hdi);
+PRIVATE int	waitfor			(int mask, int val, int timeout);
+PRIVATE void	interrupt_wait		();
+PRIVATE	void	hd_identify		(int drive);
+PRIVATE void	print_identify_info	(u16* hdinfo);
 
-PRIVATE u8 hd_status;
-PRIVATE u8 hdbuf[SECTOR_SIZE * 2];
-PRIVATE struct hd_info hd_info[1];
+PRIVATE	u8		hd_status;
+PRIVATE	u8		hdbuf[SECTOR_SIZE * 2];
+PRIVATE	struct hd_info	hd_info[1];
 
-#define DRV_OF_DEV(dev) (dev <= MAX_PRIM ? \
-	dev / NR_PRIM_PER_DRIVE : \
-	(dev - MINOR_hd1a) / NR_SUB_PER_DRIVE)
+#define	DRV_OF_DEV(dev) (dev <= MAX_PRIM ? \
+			 dev / NR_PRIM_PER_DRIVE : \
+			 (dev - MINOR_hd1a) / NR_SUB_PER_DRIVE)
 
 /*****************************************************************************
  *                                task_hd
@@ -55,40 +56,38 @@ PUBLIC void task_hd()
 
 	init_hd();
 
-	while(1)
-	{
-		send_recv(RECEIVE,ANY,&msg);
+	while (1) {
+		send_recv(RECEIVE, ANY, &msg);
 
 		int src = msg.source;
 
-		switch(msg.type)
-		{
+		switch (msg.type) {
 		case DEV_OPEN:
-			if(src == TASK_FS)
-			{
-				printl("---Dev_Open---\n");
-			}
 			hd_open(msg.DEVICE);
 			break;
+
 		case DEV_CLOSE:
 			hd_close(msg.DEVICE);
 			break;
+
 		case DEV_READ:
 		case DEV_WRITE:
 			hd_rdwt(&msg);
 			break;
+
 		case DEV_IOCTL:
 			hd_ioctl(&msg);
 			break;
+
 		default:
-			dump_msg("HD driver::unknown msg",&msg);
-			spin("FS::main_loop(invalid msg.type)");
+			dump_msg("HD driver::unknown msg", &msg);
+			spin("FS::main_loop (invalid msg.type)");
 			break;
 		}
-		send_recv(SEND,src,&msg);
+
+		send_recv(SEND, src, &msg);
 	}
 }
-
 
 /*****************************************************************************
  *                                init_hd
@@ -100,19 +99,18 @@ PUBLIC void task_hd()
 PRIVATE void init_hd()
 {
 	int i;
+
 	/* Get the number of drives from the BIOS data area */
-	u8* pNrDrives = (u8*)(0x475);
-	printl("NrDrives:%d.\n",*pNrDrives);
+	u8 * pNrDrives = (u8*)(0x475);
+	printl("NrDrives:%d.\n", *pNrDrives);
 	assert(*pNrDrives);
 
-	put_irq_handler(AT_WINI_IRQ,hd_handler);
+	put_irq_handler(AT_WINI_IRQ, hd_handler);
 	enable_irq(CASCADE_IRQ);
 	enable_irq(AT_WINI_IRQ);
 
-	for(i = 0; i < (sizeof(hd_info) / sizeof(hd_info[0])); i++)
-	{
-		memset(&hd_info[i],0,sizeof(hd_info[0]));
-	}
+	for (i = 0; i < (sizeof(hd_info) / sizeof(hd_info[0])); i++)
+		memset(&hd_info[i], 0, sizeof(hd_info[0]));
 	hd_info[0].open_cnt = 0;
 }
 
@@ -129,17 +127,15 @@ PRIVATE void init_hd()
 PRIVATE void hd_open(int device)
 {
 	int drive = DRV_OF_DEV(device);
-	assert(drive == 0); /* only one drive */
+	assert(drive == 0);	/* only one drive */
 
 	hd_identify(drive);
 
-	/*if(hd_info[drive].open_cnt++ == 0)
-	{
-		partition(drive * (NR_PART_PER_DRIVE + 1),P_PRIMARY);
+	if (hd_info[drive].open_cnt++ == 0) {
+		partition(drive * (NR_PART_PER_DRIVE + 1), P_PRIMARY);
 		print_hdinfo(&hd_info[drive]);
-	}*/
+	}
 }
-
 
 /*****************************************************************************
  *                                hd_close
@@ -152,11 +148,10 @@ PRIVATE void hd_open(int device)
 PRIVATE void hd_close(int device)
 {
 	int drive = DRV_OF_DEV(device);
-	assert(drive == 0); /* only one drive */
+	assert(drive == 0);	/* only one drive */
 
 	hd_info[drive].open_cnt--;
 }
-
 
 
 /*****************************************************************************
@@ -167,7 +162,7 @@ PRIVATE void hd_close(int device)
  * 
  * @param p Message ptr.
  *****************************************************************************/
-PRIVATE void hd_rdwt(MESSAGE* p)
+PRIVATE void hd_rdwt(MESSAGE * p)
 {
 	int drive = DRV_OF_DEV(p->DEVICE);
 
@@ -215,7 +210,7 @@ PRIVATE void hd_rdwt(MESSAGE* p)
 		bytes_left -= SECTOR_SIZE;
 		la += SECTOR_SIZE;
 	}
-}
+}															
 
 
 /*****************************************************************************
@@ -231,10 +226,9 @@ PRIVATE void hd_ioctl(MESSAGE * p)
 	int device = p->DEVICE;
 	int drive = DRV_OF_DEV(device);
 
-	struct hd_info* hdi = &hd_info[drive];
+	struct hd_info * hdi = &hd_info[drive];
 
-	if(p->REQUEST == DIOCTL_GET_GEO)
-	{
+	if (p->REQUEST == DIOCTL_GET_GEO) {
 		void * dst = va2la(p->PROC_NR, p->BUF);
 		void * src = va2la(TASK_HD,
 				   device < MAX_PRIM ?
@@ -244,12 +238,10 @@ PRIVATE void hd_ioctl(MESSAGE * p)
 
 		phys_copy(dst, src, sizeof(struct part_info));
 	}
-	else
-	{
+	else {
 		assert(0);
 	}
 }
-
 
 /*****************************************************************************
  *                                get_part_table
@@ -261,17 +253,18 @@ PRIVATE void hd_ioctl(MESSAGE * p)
  * @param sect_nr The sector at which the partition table is located.
  * @param entry   Ptr to part_ent struct.
  *****************************************************************************/
-PRIVATE void get_part_table(int drive,int sect_nr,struct part_ent* entry)
+PRIVATE void get_part_table(int drive, int sect_nr, struct part_ent * entry)
 {
 	struct hd_cmd cmd;
-	cmd.features = 0;
-	cmd.count = 1;
-	cmd.lba_low = sect_nr & 0xFF;
-	cmd.lba_mid = (sect_nr >> 8) & 0xFF;
-	cmd.lba_high = (sect_nr >> 16) & 0xFF;
-	cmd.device = MAKE_DEVICE_REG(1, /* LBA mode */
-		drive,(sect_nr >> 24) & 0xF);
-	cmd.command = ATA_READ;
+	cmd.features	= 0;
+	cmd.count	= 1;
+	cmd.lba_low	= sect_nr & 0xFF;
+	cmd.lba_mid	= (sect_nr >>  8) & 0xFF;
+	cmd.lba_high	= (sect_nr >> 16) & 0xFF;
+	cmd.device	= MAKE_DEVICE_REG(1, /* LBA mode*/
+					  drive,
+					  (sect_nr >> 24) & 0xF);
+	cmd.command	= ATA_READ;
 	hd_cmd_out(&cmd);
 	interrupt_wait();
 
@@ -291,49 +284,42 @@ PRIVATE void get_part_table(int drive,int sect_nr,struct part_ent* entry)
  * @param device Device nr.
  * @param style  P_PRIMARY or P_EXTENDED.
  *****************************************************************************/
-PRIVATE void partition(int device,int style)
+PRIVATE void partition(int device, int style)
 {
 	int i;
 	int drive = DRV_OF_DEV(device);
-	struct hd_info* hdi = &hd_info[drive];
+	struct hd_info * hdi = &hd_info[drive];
 
 	struct part_ent part_tbl[NR_SUB_PER_DRIVE];
 
-	if(style == P_PRIMARY)
-	{
-		get_part_table(drive,drive,part_tbl);
+	if (style == P_PRIMARY) {
+		get_part_table(drive, drive, part_tbl);
 
 		int nr_prim_parts = 0;
-		for(i = 0; i < NR_PART_PER_DRIVE; i++)
-		{  /* 0~3 */
-			if(part_tbl[i].sys_id == NO_PART)
-			{
+		for (i = 0; i < NR_PART_PER_DRIVE; i++) { /* 0~3 */
+			if (part_tbl[i].sys_id == NO_PART) 
 				continue;
-			}
 
 			nr_prim_parts++;
-			int dev_nr = i + 1; /* 1~4 */
+			int dev_nr = i + 1;		  /* 1~4 */
 			hdi->primary[dev_nr].base = part_tbl[i].start_sect;
 			hdi->primary[dev_nr].size = part_tbl[i].nr_sects;
 
-			if(part_tbl[i].sys_id == EXT_PART) /* extended */
-			{
-				partition(device + dev_nr,P_EXTENDED);
-			}
+			if (part_tbl[i].sys_id == EXT_PART) /* extended */
+				partition(device + dev_nr, P_EXTENDED);
 		}
 		assert(nr_prim_parts != 0);
 	}
-	else if(style == P_EXTENDED)
-	{
+	else if (style == P_EXTENDED) {
 		int j = device % NR_PRIM_PER_DRIVE; /* 1~4 */
 		int ext_start_sect = hdi->primary[j].base;
 		int s = ext_start_sect;
 		int nr_1st_sub = (j - 1) * NR_SUB_PER_PART; /* 0/16/32/48 */
-		for(i = 0; i < NR_SUB_PER_PART ; i++)
-		{
-			int dev_nr = nr_1st_sub + i;  /* 0~15/16~31/32~47/48~63 */
 
-			get_part_table(drive,s,part_tbl);
+		for (i = 0; i < NR_SUB_PER_PART; i++) {
+			int dev_nr = nr_1st_sub + i;/* 0~15/16~31/32~47/48~63 */
+
+			get_part_table(drive, s, part_tbl);
 
 			hdi->logical[dev_nr].base = s + part_tbl[0].start_sect;
 			hdi->logical[dev_nr].size = part_tbl[0].nr_sects;
@@ -342,17 +328,14 @@ PRIVATE void partition(int device,int style)
 
 			/* no more logical partitions
 			   in this extended partition */
-			if(part_tbl[1].sys_id == NO_PART)
+			if (part_tbl[1].sys_id == NO_PART)
 				break;
-
 		}
 	}
-	else
-	{
+	else {
 		assert(0);
 	}
 }
-
 
 /*****************************************************************************
  *                                print_hdinfo
@@ -362,25 +345,21 @@ PRIVATE void partition(int device,int style)
  * 
  * @param hdi  Ptr to struct hd_info.
  *****************************************************************************/
-PRIVATE void print_hdinfo(struct hd_info* hdi)
+PRIVATE void print_hdinfo(struct hd_info * hdi)
 {
 	int i;
-	for(i = 0; i < NR_PART_PER_DRIVE + 1; i++)
-	{
-		printl("%sPART_%d: base %d(0x%x),size %d(0x%x) (in sector)\n",
-			i == 0 ? " ":"    ",
-			i,
-			hdi->primary[i].base,
-			hdi->primary[i].base,
-			hdi->primary[i].size,
-			hdi->primary[i].size);
+	for (i = 0; i < NR_PART_PER_DRIVE + 1; i++) {
+		printl("%sPART_%d(%x): base %d(0x%x), size %d(0x%x) (in sector)\n",
+		       i == 0 ? " " : "     ",
+		       i,i,
+		       hdi->primary[i].base,
+		       hdi->primary[i].base,
+		       hdi->primary[i].size,
+		       hdi->primary[i].size);
 	}
-	for(i = 0; i < NR_SUB_PER_DRIVE ; i++)
-	{
-		if(hdi->logical[i].size == 0)
-		{
+	for (i = 0; i < NR_SUB_PER_DRIVE; i++) {
+		if (hdi->logical[i].size == 0)
 			continue;
-		}
 		printl("         "
 		       "%d: base %d(0x%x), size %d(0x%x) (in sector)\n",
 		       i,
@@ -390,7 +369,6 @@ PRIVATE void print_hdinfo(struct hd_info* hdi)
 		       hdi->logical[i].size);
 	}
 }
-
 
 /*****************************************************************************
  *                                hd_identify
@@ -403,22 +381,19 @@ PRIVATE void print_hdinfo(struct hd_info* hdi)
 PRIVATE void hd_identify(int drive)
 {
 	struct hd_cmd cmd;
-	cmd.device = MAKE_DEVICE_REG(0,drive,0);
+	cmd.device  = MAKE_DEVICE_REG(0, drive, 0);
 	cmd.command = ATA_IDENTIFY;
 	hd_cmd_out(&cmd);
-	printl("--hd_identify--\n");
 	interrupt_wait();
-	printl("--interrupt_wait end--\n");
-	port_read(REG_DATA,hdbuf,SECTOR_SIZE);
+	port_read(REG_DATA, hdbuf, SECTOR_SIZE);
 
 	print_identify_info((u16*)hdbuf);
 
-	u16* hdinfo = ((u16*)hdbuf);
+	u16* hdinfo = (u16*)hdbuf;
 
 	hd_info[drive].primary[0].base = 0;
 	/* Total Nr of User Addressable Sectors */
 	hd_info[drive].primary[0].size = ((int)hdinfo[61] << 16) + hdinfo[60];
-
 }
 
 /*****************************************************************************
@@ -431,38 +406,36 @@ PRIVATE void hd_identify(int drive)
  *****************************************************************************/
 PRIVATE void print_identify_info(u16* hdinfo)
 {
-	int i,k;
+	int i, k;
 	char s[64];
 
 	struct iden_info_ascii {
 		int idx;
 		int len;
-		char *desc;
-	} iinfo[] = { {10,20,"HD SN"}, /* Serial number in ASCII */
-	{27,40,"HD Model"} /* Model number in ASCII */ };
+		char * desc;
+	} iinfo[] = {{10, 20, "HD SN"}, /* Serial number in ASCII */
+		     {27, 40, "HD Model"} /* Model number in ASCII */ };
 
-	for(k = 0; k < sizeof(iinfo)/sizeof(iinfo[0]);k++)
-	{
-		char* p = (char*)&hdinfo[iinfo[k].idx];
-		for(i = 0; i < iinfo[k].len/2;i++)
-		{
+	for (k = 0; k < sizeof(iinfo)/sizeof(iinfo[0]); k++) {
+		char * p = (char*)&hdinfo[iinfo[k].idx];
+		for (i = 0; i < iinfo[k].len/2; i++) {
 			s[i*2+1] = *p++;
 			s[i*2] = *p++;
 		}
 		s[i*2] = 0;
-		printl("%s: %s\n",iinfo[k].desc,s);
+		printl("%s: %s\n", iinfo[k].desc, s);
 	}
 
 	int capabilities = hdinfo[49];
 	printl("LBA supported: %s\n",
-		(capabilities & 0x0200) ? "Yes" : "No");
+	       (capabilities & 0x0200) ? "Yes" : "No");
 
 	int cmd_set_supported = hdinfo[83];
 	printl("LBA48 supported: %s\n",
-		(capabilities & 0x0200) ? "Yes" : "No");
+	       (cmd_set_supported & 0x0400) ? "Yes" : "No");
 
 	int sectors = ((int)hdinfo[61] << 16) + hdinfo[60];
-	printl("HD size:%dMB\n",sectors * 512 / 1000000);
+	printl("HD size: %dMB\n", sectors * 512 / 1000000);
 }
 
 /*****************************************************************************
@@ -479,34 +452,20 @@ PRIVATE void hd_cmd_out(struct hd_cmd* cmd)
 	 * For all commands, the host must first check if BSY=1,
 	 * and should proceed no further unless and until BSY=0
 	 */
-	if(!waitfor(STATUS_BSY,0,HD_TIMEOUT))
+	if (!waitfor(STATUS_BSY, 0, HD_TIMEOUT))
 		panic("hd error.");
-	int state = in_byte(REG_STATUS);
-
-	if(state & 0x01)
-	{
-		printl("--Error--\n");
-	}
-	if(state & 0x20)
-	{
-		printl("--Device Fault--\n");
-	}
-	if((state & 0x08) == 0)
-	{
-		printl("--DRQ should be set--\n");
-	}
 
 	/* Activate the Interrupt Enable (nIEN) bit */
-	out_byte(REG_DEV_CTRL,0);
+	out_byte(REG_DEV_CTRL, 0);
 	/* Load required parameters in the Command Block Registers */
-	out_byte(REG_FEATURES,cmd->features);
-	out_byte(REG_NSECTOR,cmd->count);
-	out_byte(REG_LBA_LOW,cmd->lba_low);
-	out_byte(REG_LBA_MID,cmd->lba_mid);
-	out_byte(REG_LBA_HIGH,cmd->lba_high);
-	out_byte(REG_DEVICE,cmd->device);
+	out_byte(REG_FEATURES, cmd->features);
+	out_byte(REG_NSECTOR,  cmd->count);
+	out_byte(REG_LBA_LOW,  cmd->lba_low);
+	out_byte(REG_LBA_MID,  cmd->lba_mid);
+	out_byte(REG_LBA_HIGH, cmd->lba_high);
+	out_byte(REG_DEVICE,   cmd->device);
 	/* Write the command code to the Command Register */
-	out_byte(REG_CMD,cmd->command);
+	out_byte(REG_CMD,     cmd->command);
 }
 
 /*****************************************************************************
@@ -519,7 +478,7 @@ PRIVATE void hd_cmd_out(struct hd_cmd* cmd)
 PRIVATE void interrupt_wait()
 {
 	MESSAGE msg;
-	send_recv(RECEIVE,INTERRUPT,&msg);
+	send_recv(RECEIVE, INTERRUPT, &msg);
 }
 
 /*****************************************************************************
@@ -534,17 +493,14 @@ PRIVATE void interrupt_wait()
  * 
  * @return One if sucess, zero if timeout.
  *****************************************************************************/
-PRIVATE int waitfor(int mask,int val,int timeout)
+PRIVATE int waitfor(int mask, int val, int timeout)
 {
 	int t = get_ticks();
 
 	while(((get_ticks() - t) * 1000 / HZ) < timeout)
-	{
-		if((in_byte(REG_STATUS) & mask) == val)
-		{
+		if ((in_byte(REG_STATUS) & mask) == val)
 			return 1;
-		}
-	}
+
 	return 0;
 }
 

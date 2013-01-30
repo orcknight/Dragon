@@ -109,6 +109,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fs\main.c" />
+    <ClCompile Include="fs\misc.c" />
+    <ClCompile Include="fs\open.c" />
     <ClCompile Include="kernel\clock.c" />
     <ClCompile Include="kernel\console.c" />
     <ClCompile Include="kernel\global.c" />
@@ -127,6 +129,7 @@
     <ClCompile Include="kernel\vsprintf.c" />
     <ClCompile Include="lib\klib.c" />
     <ClCompile Include="lib\misc.c" />
+    <ClCompile Include="lib\open.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,14 +2,13 @@
  *****************************************************************************
  * @file   include/sys/hd.h
  * @brief  
- * @author ppx
- * @date   2012
+ * @author Forrest Y. Yu
+ * @date   2008
  *****************************************************************************
  *****************************************************************************/
 
-#ifndef _ORANGES_HD_H_
-#define _ORANGES_HD_H_
-
+#ifndef	_ORANGES_HD_H_
+#define	_ORANGES_HD_H_
 
 /**
  * @struct part_ent
@@ -29,7 +28,6 @@
  *   It is essentially a link list with many tricks. See
  *   http://en.wikipedia.org/wiki/Extended_boot_record for details.
  */
-
 struct part_ent {
 	u8 boot_ind;		/**
 				 * boot indicator
@@ -107,8 +105,8 @@ struct part_ent {
 /* Command Block Registers */
 /*	MACRO		PORT			DESCRIPTION			INPUT/OUTPUT	*/
 /*	-----		----			-----------			------------	*/
-#define REG_DATA	0x1E8		/*	Data				I/O		*/
-#define REG_FEATURES	0x1E9		/*	Features			O		*/
+#define REG_DATA	0x1F0		/*	Data				I/O		*/
+#define REG_FEATURES	0x1F1		/*	Features			O		*/
 #define REG_ERROR	REG_FEATURES	/*	Error				I		*/
 					/* 	The contents of this register are valid only when the error bit
 						(ERR) in the Status Register is set, except at drive power-up or at the
@@ -129,11 +127,11 @@ struct part_ent {
 						   |     `--------------------------------------- 6. Uncorrectable data error encountered
 						   `--------------------------------------------- 7. Bad block mark detected in the requested sector's ID field
 					*/
-#define REG_NSECTOR	0x1EA		/*	Sector Count			I/O		*/
-#define REG_LBA_LOW	0x1EB		/*	Sector Number / LBA Bits 0-7	I/O		*/
-#define REG_LBA_MID	0x1EC		/*	Cylinder Low / LBA Bits 8-15	I/O		*/
-#define REG_LBA_HIGH 0x1ED		/*	Cylinder High / LBA Bits 16-23	I/O		*/
-#define REG_DEVICE	0x1EE		/*	Drive | Head | LBA bits 24-27	I/O		*/
+#define REG_NSECTOR	0x1F2		/*	Sector Count			I/O		*/
+#define REG_LBA_LOW	0x1F3		/*	Sector Number / LBA Bits 0-7	I/O		*/
+#define REG_LBA_MID	0x1F4		/*	Cylinder Low / LBA Bits 8-15	I/O		*/
+#define REG_LBA_HIGH	0x1F5		/*	Cylinder High / LBA Bits 16-23	I/O		*/
+#define REG_DEVICE	0x1F6		/*	Drive | Head | LBA bits 24-27	I/O		*/
 					/*	|  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 						+-----+-----+-----+-----+-----+-----+-----+-----+
 						|  1  |  L  |  1  | DRV | HS3 | HS2 | HS1 | HS0 |
@@ -150,7 +148,7 @@ struct part_ent {
 					 	                                                            When L=0, addressing is by 'CHS' mode.
 					 	                                                            When L=1, addressing is by 'LBA' mode.
 					*/
-#define REG_STATUS	0x1EF		/*	Status				I		*/
+#define REG_STATUS	0x1F7		/*	Status				I		*/
 					/* 	Any pending interrupt is cleared whenever this register is read.
 						|  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 						+-----+-----+-----+-----+-----+-----+-----+-----+
@@ -199,7 +197,7 @@ struct part_ent {
 /* Control Block Registers */
 /*	MACRO		PORT			DESCRIPTION			INPUT/OUTPUT	*/
 /*	-----		----			-----------			------------	*/
-#define REG_DEV_CTRL	0x3E6		/*	Device Control			O		*/
+#define REG_DEV_CTRL	0x3F6		/*	Device Control			O		*/
 					/*	|  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
 						+-----+-----+-----+-----+-----+-----+-----+-----+
 						| HOB |  -  |  -  |  -  |  -  |SRST |-IEN |  0  |
@@ -239,18 +237,12 @@ struct hd_cmd {
 
 struct part_info {
 	u32	base;	/* # of start sector (NOT byte offset, but SECTOR) */
-	u32	size;	/* how many sectors in this partition (NOT byte size, but SECTOR number) */
+	u32	size;	/* how many sectors in this partition */
 };
 
 /* main drive struct, one entry per drive */
 struct hd_info
 {
-	/* int			cylinders; */
-	/* int			heads; */
-	/* int			sectors; */
-	/* int			precomp; */
-	/* int			lzone; */
-	/* int			ctl; */
 	int			open_cnt;
 	struct part_info	primary[NR_PRIM_PER_DRIVE];
 	struct part_info	logical[NR_SUB_PER_DRIVE];

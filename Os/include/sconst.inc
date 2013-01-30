@@ -2,7 +2,7 @@
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;                               sconst.inc
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-;                                                     ppx, 2012
+;                                                     Forrest Yu, 2005
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 P_STACKBASE	equ	0
@@ -30,15 +30,15 @@ P_LDT		equ	P_LDT_SEL	+ 4
 
 TSS3_S_SP0	equ	4
 
-
-INT_M_CTL	equ	0x20 ; I/O port for interrupt controller        <Master>
-INT_M_CTLMASK	equ	0x21 ; setting bits in this port disables ints  <Master>
-INT_S_CTL	equ	0xA0 ; I/O port for second interrupt controller <Slave>
-INT_S_CTLMASK	equ	0xA1 ; setting bits in this port disables ints  <Slave>
+INT_M_CTL	equ	0x20	; I/O port for interrupt controller         <Master>
+INT_M_CTLMASK	equ	0x21	; setting bits in this port disables ints   <Master>
+INT_S_CTL	equ	0xA0	; I/O port for second interrupt controller  <Slave>
+INT_S_CTLMASK	equ	0xA1	; setting bits in this port disables ints   <Slave>
 
 EOI		equ	0x20
 
-; ÒÔÏÂÑ¡Ôñ×ÓÖµ±ØĞëÓë protect.h ÖĞ±£³ÖÒ»ÖÂ!!!
-SELECTOR_FLAT_C		equ		0x08	; LOADER ÀïÃæÒÑ¾­È·¶¨ÁËµÄ.
-SELECTOR_TSS		equ		0x20	; TSS
+; ä»¥ä¸‹é€‰æ‹©å­å€¼å¿…é¡»ä¸ protect.h ä¸­ä¿æŒä¸€è‡´!!!
+SELECTOR_FLAT_C		equ		0x08		; LOADER é‡Œé¢å·²ç»ç¡®å®šäº†çš„.
+SELECTOR_TSS		equ		0x20		; TSS. ä»å¤–å±‚è·³åˆ°å†…å­˜æ—¶ SS å’Œ ESP çš„å€¼ä»é‡Œé¢è·å¾—.
 SELECTOR_KERNEL_CS	equ		SELECTOR_FLAT_C
+

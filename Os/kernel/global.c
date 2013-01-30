@@ -2,7 +2,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                             global.c
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                                                    ppx, 2012
+                                                    Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #define GLOBAL_VARIABLES_HERE
@@ -17,29 +17,29 @@
 #include "global.h"
 #include "proto.h"
 
-PUBLIC PROCESS proc_table[NR_TASKS + NR_PROCS];
-PUBLIC char task_stack[STACK_SIZE_TOTAL];
 
-PUBLIC TASK task_table[NR_TASKS] = { 
-	{task_tty,STACK_SIZE_TTY,"tty"},
-	{task_sys,STACK_SIZE_SYS,"SYS"},
-	{task_hd, STACK_SIZE_HD, "HD" },
-	{task_fs, STACK_SIZE_FS, "FS" }};
+PUBLIC	struct proc	proc_table[NR_TASKS + NR_PROCS];
 
-PUBLIC TASK user_proc_table[NR_PROCS] = {
-	{TestA,STACK_SIZE_TESTA,"TestA"},
-	{TestB,STACK_SIZE_TESTB,"TestB"},
-	{TestC,STACK_SIZE_TESTC,"TestC"}
-};
+PUBLIC	struct task	task_table[NR_TASKS] = {
+	{task_tty, STACK_SIZE_TTY, "TTY"},
+	{task_sys, STACK_SIZE_SYS, "SYS"},
+	{task_hd,  STACK_SIZE_HD,  "HD" },
+	{task_fs,  STACK_SIZE_FS,  "FS" }};
 
+PUBLIC	struct task	user_proc_table[NR_PROCS] = {
+	{TestA, STACK_SIZE_TESTA, "TestA"},
+	{TestB, STACK_SIZE_TESTB, "TestB"},
+	{TestC, STACK_SIZE_TESTC, "TestC"}};
 
-PUBLIC TTY tty_table[NR_CONSOLES];
-PUBLIC CONSOLE console_table[NR_CONSOLES];
+PUBLIC	char		task_stack[STACK_SIZE_TOTAL];
 
-PUBLIC irq_handler irq_table[NR_IRQ];
-PUBLIC system_call sys_call_table[NR_SYS_CALL] = 
-					{sys_printx,sys_sendrec};
+PUBLIC	TTY		tty_table[NR_CONSOLES];
+PUBLIC	CONSOLE		console_table[NR_CONSOLES];
 
+PUBLIC	irq_handler	irq_table[NR_IRQ];
+
+PUBLIC	system_call	sys_call_table[NR_SYS_CALL] = {sys_printx,
+						       sys_sendrec};
 
 /* FS related below */
 /*****************************************************************************/
@@ -47,7 +47,7 @@ PUBLIC system_call sys_call_table[NR_SYS_CALL] =
  * For dd_map[k],
  * `k' is the device nr.\ dd_map[k].driver_nr is the driver nr.
  *
- * Remeber to modify include/const.h if the order is changed
+ * Remeber to modify include/const.h if the order is changed.
  *****************************************************************************/
 struct dev_drv_map dd_map[] = {
 	/* driver nr.		major device nr.
@@ -65,4 +65,5 @@ struct dev_drv_map dd_map[] = {
  */
 PUBLIC	u8 *		fsbuf		= (u8*)0x600000;
 PUBLIC	const int	FSBUF_SIZE	= 0x100000;
-PUBLIC  struct file_base hdd_base;
+
+

@@ -175,5 +175,14 @@
     <ClCompile Include="kernel\pci.c">
       <Filter>kernel</Filter>
     </ClCompile>
+    <ClCompile Include="lib\open.c">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="fs\open.c">
+      <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="fs\misc.c">
+      <Filter>fs</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

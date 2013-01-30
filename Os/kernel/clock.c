@@ -2,7 +2,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                                clock.c
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                                                    ppx, 2012
+                                                    Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "type.h"
@@ -25,19 +25,17 @@ PUBLIC void clock_handler(int irq)
 	ticks++;
 	p_proc_ready->ticks--;
 
-	if(k_reenter != 0)
-	{
-		return ;
+	if (k_reenter != 0) {
+		return;
 	}
 
-	if(p_proc_ready->ticks > 0)
-	{
-		return ;
+	if (p_proc_ready->ticks > 0) {
+		return;
 	}
 
 	schedule();
-}
 
+}
 
 /*======================================================================*
                               milli_delay
@@ -54,11 +52,13 @@ PUBLIC void milli_delay(int milli_sec)
  *======================================================================*/
 PUBLIC void init_clock()
 {
-	/* ³õÊ¼»¯ 8253 PIT */
-	out_byte(TIMER_MODE, RATE_GENERATOR);
-	out_byte(TIMER0, (u8) (TIMER_FREQ/HZ) );
-	out_byte(TIMER0, (u8) ((TIMER_FREQ/HZ) >> 8));
+        /* åˆå§‹åŒ– 8253 PIT */
+        out_byte(TIMER_MODE, RATE_GENERATOR);
+        out_byte(TIMER0, (u8) (TIMER_FREQ/HZ) );
+        out_byte(TIMER0, (u8) ((TIMER_FREQ/HZ) >> 8));
 
-	put_irq_handler(CLOCK_IRQ, clock_handler);      /* Éè¶¨Ê±ÖÓÖĞ¶Ï´¦Àí³ÌĞò */
-	enable_irq(CLOCK_IRQ);                        /* ÈÃ8259A¿ÉÒÔ½ÓÊÕÊ±ÖÓÖĞ¶Ï */
+        put_irq_handler(CLOCK_IRQ, clock_handler);    /* è®¾å®šæ—¶é’Ÿä¸­æ–­å¤„ç†ç¨‹åº */
+        enable_irq(CLOCK_IRQ);                        /* è®©8259Aå¯ä»¥æ¥æ”¶æ—¶é’Ÿä¸­æ–­ */
 }
+
+

@@ -2,7 +2,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                               vsprintf.c
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                                                    ppx, 2012
+                                                    Forrest Yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "type.h"
@@ -35,81 +35,71 @@ PRIVATE char* i2a(int val, int base, char ** ps)
 }
 
 
-/*
- *  Îª¸üºÃµØÀí½â´Ëº¯ÊıµÄÔ­Àí£¬¿É²Î¿¼ printf µÄ×¢ÊÍ²¿·Ö¡£
- */
-
 /*======================================================================*
                                 vsprintf
  *======================================================================*/
-int vsprintf(char *buf,const char *fmt,va_list args)
+/*
+ *  ä¸ºæ›´å¥½åœ°ç†è§£æ­¤å‡½æ•°çš„åŸç†ï¼Œå¯å‚è€ƒ printf çš„æ³¨é‡Šéƒ¨åˆ†ã€‚
+ */
+PUBLIC int vsprintf(char *buf, const char *fmt, va_list args)
 {
-	char* p;
-	va_list p_next_arg = args;
-	int m;
+	char*	p;
 
-	char inner_buf[STR_DEFAULT_LEN];
-	char cs;
-	int align_nr;
+	va_list	p_next_arg = args;
+	int	m;
 
-	for(p=buf;*fmt;fmt++)
-	{
-		if(*fmt != '%')
-		{
+	char	inner_buf[STR_DEFAULT_LEN];
+	char	cs;
+	int	align_nr;
+
+	for (p=buf;*fmt;fmt++) {
+		if (*fmt != '%') {
 			*p++ = *fmt;
 			continue;
 		}
-		else    /* a format string begins */
-		{
+		else {		/* a format string begins */
 			align_nr = 0;
 		}
-	
+
 		fmt++;
 
-		if(*fmt == '%')
-		{
+		if (*fmt == '%') {
 			*p++ = *fmt;
 			continue;
 		}
-		else if(*fmt == '0')
-		{
+		else if (*fmt == '0') {
 			cs = '0';
 			fmt++;
 		}
-		else
-		{
+		else {
 			cs = ' ';
 		}
-		while(((unsigned char)(*fmt) >= '0') && ((unsigned char)(*fmt) <= '9'))
-		{
+		while (((unsigned char)(*fmt) >= '0') && ((unsigned char)(*fmt) <= '9')) {
 			align_nr *= 10;
 			align_nr += *fmt - '0';
 			fmt++;
 		}
 
-		char* q = inner_buf;
-		memset(q,0,sizeof(inner_buf));
+		char * q = inner_buf;
+		memset(q, 0, sizeof(inner_buf));
 
-
-		switch (*fmt)
-		{
+		switch (*fmt) {
 		case 'c':
 			*q++ = *((char*)p_next_arg);
 			p_next_arg += 4;
 			break;
 		case 'x':
 			m = *((int*)p_next_arg);
-			i2a(m,16,&q);
+			i2a(m, 16, &q);
 			p_next_arg += 4;
 			break;
 		case 'd':
 			m = *((int*)p_next_arg);
-			if(m < 0)
-			{
+			if (m < 0) {
 				m = m * (-1);
 				*q++ = '-';
 			}
-			i2a(m,10,&q);
+			i2a(m, 10, &q);
 			p_next_arg += 4;
 			break;
 		case 's':
@@ -120,21 +110,19 @@ int vsprintf(char *buf,const char *fmt,va_list args)
 		default:
 			break;
 		}
-		
+
 		int k;
-		for(k = 0; k < ((align_nr > strlen(inner_buf)) ? (align_nr - strlen(inner_buf)):0);k++)
-		{
+		for (k = 0; k < ((align_nr > strlen(inner_buf)) ? (align_nr - strlen(inner_buf)) : 0); k++) {
 			*p++ = cs;
 		}
 		q = inner_buf;
-		while(*q)
-		{
+		while (*q) {
 			*p++ = *q++;
 		}
 	}
 
 	*p = 0;
-	
+
 	return (p - buf);
 }
 
@@ -142,8 +130,8 @@ int vsprintf(char *buf,const char *fmt,va_list args)
 /*======================================================================*
                                  sprintf
  *======================================================================*/
-int sprintf(char *buf,const char *fmt,...)
+int sprintf(char *buf, const char *fmt, ...)
 {
-	va_list arg = (va_list)((char*)(&fmt) + 4);
-	return vsprintf(buf,fmt,arg);
+	va_list arg = (va_list)((char*)(&fmt) + 4);        /* 4 æ˜¯å‚æ•° fmt æ‰€å å †æ ˆä¸­çš„å¤§å° */
+	return vsprintf(buf, fmt, arg);
 }

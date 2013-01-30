@@ -49,8 +49,8 @@ PUBLIC void init_mouse()
 	out_byte(KB_DATA,0xf4);
 
 
-	put_irq_handler(MOUSE_IRQ,mouse_handler); /*设定键盘中断处理程序*/
-	enable_irq(MOUSE_IRQ);                       /*开键盘中断*/
+	//put_irq_handler(MOUSE_IRQ,mouse_handler); /*设定键盘中断处理程序*/
+	//enable_irq(MOUSE_IRQ);                       /*开键盘中断*/
 }
 
 
