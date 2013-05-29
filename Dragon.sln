@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Dragon", "Dragon\Dragon.vcproj", "{B364E078-98CD-463A-B4DE-243D62E75741}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B364E078-98CD-463A-B4DE-243D62E75741}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B364E078-98CD-463A-B4DE-243D62E75741}.Debug|Win32.Build.0 = Debug|Win32
+		{B364E078-98CD-463A-B4DE-243D62E75741}.Release|Win32.ActiveCfg = Release|Win32
+		{B364E078-98CD-463A-B4DE-243D62E75741}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
