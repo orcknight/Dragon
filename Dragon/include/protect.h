@@ -2,156 +2,156 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                             protect.h
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                                                    Forrest Yu, 2005
+                                                    PPX, 2010
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-#ifndef	_ORANGES_PROTECT_H_
-#define	_ORANGES_PROTECT_H_
+#ifndef _ORANGES_PROTECT_H_
+#define _ORANGES_PROTECT_H_
 
 
-/* å­˜å‚¨æ®µæè¿°ç¬¦/ç³»ç»Ÿæ®µæè¿°ç¬¦ */
-struct descriptor		/* å…± 8 ä¸ªå­—èŠ‚ */
+/* ´æ´¢¶ÎÃèÊö·û/ÏµÍ³¶ÎÃèÊö·û */
+struct descriptor       /* ¹² 8 ¸ö×Ö½Ú */
 {
-	u16	limit_low;		/* Limit */
-	u16	base_low;		/* Base */
-	u8	base_mid;		/* Base */
-	u8	attr1;			/* P(1) DPL(2) DT(1) TYPE(4) */
-	u8	limit_high_attr2;	/* G(1) D(1) 0(1) AVL(1) LimitHigh(4) */
-	u8	base_high;		/* Base */
+    u16 limit_low;      /* Limit */
+    u16 base_low;       /* Base */
+    u8  base_mid;       /* Base */
+    u8  attr1;          /* P(1) DPL(2) DT(1) TYPE(4) */
+    u8  limit_high_attr2;   /* G(1) D(1) 0(1) AVL(1) LimitHigh(4) */
+    u8  base_high;      /* Base */
 };
 
-/* é—¨æè¿°ç¬¦ */
+/* ÃÅÃèÊö·û */
 struct gate
 {
-	u16	offset_low;	/* Offset Low */
-	u16	selector;	/* Selector */
-	u8	dcount;		/* è¯¥å­—æ®µåªåœ¨è°ƒç”¨é—¨æè¿°ç¬¦ä¸­æœ‰æ•ˆã€‚
-				å¦‚æœåœ¨åˆ©ç”¨è°ƒç”¨é—¨è°ƒç”¨å­ç¨‹åºæ—¶å¼•èµ·ç‰¹æƒçº§çš„è½¬æ¢å’Œå †æ ˆçš„æ”¹å˜ï¼Œéœ€è¦å°†å¤–å±‚å †æ ˆä¸­çš„å‚æ•°å¤åˆ¶åˆ°å†…å±‚å †æ ˆã€‚
-				è¯¥åŒå­—è®¡æ•°å­—æ®µå°±æ˜¯ç”¨äºè¯´æ˜è¿™ç§æƒ…å†µå‘ç”Ÿæ—¶ï¼Œè¦å¤åˆ¶çš„åŒå­—å‚æ•°çš„æ•°é‡ã€‚ */
-	u8	attr;		/* P(1) DPL(2) DT(1) TYPE(4) */
-	u16	offset_high;	/* Offset High */
+    u16 offset_low; /* Offset Low */
+    u16 selector;   /* Selector */
+    u8  dcount;     /* ¸Ã×Ö¶ÎÖ»ÔÚµ÷ÓÃÃÅÃèÊö·ûÖĞÓĞĞ§¡£
+                Èç¹ûÔÚÀûÓÃµ÷ÓÃÃÅµ÷ÓÃ×Ó³ÌĞòÊ±ÒıÆğÌØÈ¨¼¶µÄ×ª»»ºÍ¶ÑÕ»µÄ¸Ä±ä£¬ĞèÒª½«Íâ²ã¶ÑÕ»ÖĞµÄ²ÎÊı¸´ÖÆµ½ÄÚ²ã¶ÑÕ»¡£
+                ¸ÃË«×Ö¼ÆÊı×Ö¶Î¾ÍÊÇÓÃÓÚËµÃ÷ÕâÖÖÇé¿ö·¢ÉúÊ±£¬Òª¸´ÖÆµÄË«×Ö²ÎÊıµÄÊıÁ¿¡£ */
+    u8  attr;       /* P(1) DPL(2) DT(1) TYPE(4) */
+    u16 offset_high;    /* Offset High */
 };
 
 struct tss {
-	u32	backlink;
-	u32	esp0;		/* stack pointer to use during interrupt */
-	u32	ss0;		/*   "   segment  "  "    "        "     */
-	u32	esp1;
-	u32	ss1;
-	u32	esp2;
-	u32	ss2;
-	u32	cr3;
-	u32	eip;
-	u32	flags;
-	u32	eax;
-	u32	ecx;
-	u32	edx;
-	u32	ebx;
-	u32	esp;
-	u32	ebp;
-	u32	esi;
-	u32	edi;
-	u32	es;
-	u32	cs;
-	u32	ss;
-	u32	ds;
-	u32	fs;
-	u32	gs;
-	u32	ldt;
-	u16	trap;
-	u16	iobase;	/* I/Oä½å›¾åŸºå€å¤§äºæˆ–ç­‰äºTSSæ®µç•Œé™ï¼Œå°±è¡¨ç¤ºæ²¡æœ‰I/Oè®¸å¯ä½å›¾ */
-	/*u8	iomap[2];*/
+    u32 backlink;
+    u32 esp0;       /* stack pointer to use during interrupt */
+    u32 ss0;        /*   "   segment  "  "    "        "     */
+    u32 esp1;
+    u32 ss1;
+    u32 esp2;
+    u32 ss2;
+    u32 cr3;
+    u32 eip;
+    u32 flags;
+    u32 eax;
+    u32 ecx;
+    u32 edx;
+    u32 ebx;
+    u32 esp;
+    u32 ebp;
+    u32 esi;
+    u32 edi;
+    u32 es;
+    u32 cs;
+    u32 ss;
+    u32 ds;
+    u32 fs;
+    u32 gs;
+    u32 ldt;
+    u16 trap;
+    u16 iobase; /* I/OÎ»Í¼»ùÖ·´óÓÚ»òµÈÓÚTSS¶Î½çÏŞ£¬¾Í±íÊ¾Ã»ÓĞI/OĞí¿ÉÎ»Í¼ */
+    /*u8    iomap[2];*/
 };
 
 /* GDT */
-/* æè¿°ç¬¦ç´¢å¼• */
-#define	INDEX_DUMMY		0	/* â”“                          */
-#define	INDEX_FLAT_C		1	/* â”£ LOADER é‡Œé¢å·²ç»ç¡®å®šäº†çš„. */
-#define	INDEX_FLAT_RW		2	/* â”ƒ                          */
-#define	INDEX_VIDEO		3	/* â”›                          */
-#define	INDEX_TSS		4
-#define	INDEX_LDT_FIRST		5
-/* é€‰æ‹©å­ */
-#define	SELECTOR_DUMMY		   0		/* â”“                          */
-#define	SELECTOR_FLAT_C		0x08		/* â”£ LOADER é‡Œé¢å·²ç»ç¡®å®šäº†çš„. */
-#define	SELECTOR_FLAT_RW	0x10		/* â”ƒ                          */
-#define	SELECTOR_VIDEO		(0x18+3)	/* â”›<-- RPL=3                 */
-#define	SELECTOR_TSS		0x20		/* TSS. ä»å¤–å±‚è·³åˆ°å†…å­˜æ—¶ SS å’Œ ESP çš„å€¼ä»é‡Œé¢è·å¾—. */
-#define SELECTOR_LDT_FIRST	0x28
+/* ÃèÊö·ûË÷Òı */
+#define INDEX_DUMMY     0   /* ©·                          */
+#define INDEX_FLAT_C        1   /* ©Ç LOADER ÀïÃæÒÑ¾­È·¶¨ÁËµÄ. */
+#define INDEX_FLAT_RW       2   /* ©§                          */
+#define INDEX_VIDEO     3   /* ©¿                          */
+#define INDEX_TSS       4
+#define INDEX_LDT_FIRST     5
+/* Ñ¡Ôñ×Ó */
+#define SELECTOR_DUMMY         0        /* ©·                          */
+#define SELECTOR_FLAT_C     0x08        /* ©Ç LOADER ÀïÃæÒÑ¾­È·¶¨ÁËµÄ. */
+#define SELECTOR_FLAT_RW    0x10        /* ©§                          */
+#define SELECTOR_VIDEO      (0x18+3)    /* ©¿<-- RPL=3                 */
+#define SELECTOR_TSS        0x20        /* TSS. ´ÓÍâ²ãÌøµ½ÄÚ´æÊ± SS ºÍ ESP µÄÖµ´ÓÀïÃæ»ñµÃ. */
+#define SELECTOR_LDT_FIRST  0x28
 
-#define	SELECTOR_KERNEL_CS	SELECTOR_FLAT_C
-#define	SELECTOR_KERNEL_DS	SELECTOR_FLAT_RW
-#define	SELECTOR_KERNEL_GS	SELECTOR_VIDEO
+#define SELECTOR_KERNEL_CS  SELECTOR_FLAT_C
+#define SELECTOR_KERNEL_DS  SELECTOR_FLAT_RW
+#define SELECTOR_KERNEL_GS  SELECTOR_VIDEO
 
-/* æ¯ä¸ªä»»åŠ¡æœ‰ä¸€ä¸ªå•ç‹¬çš„ LDT, æ¯ä¸ª LDT ä¸­çš„æè¿°ç¬¦ä¸ªæ•°: */
-#define LDT_SIZE		2
+/* Ã¿¸öÈÎÎñÓĞÒ»¸öµ¥¶ÀµÄ LDT, Ã¿¸ö LDT ÖĞµÄÃèÊö·û¸öÊı: */
+#define LDT_SIZE        2
 /* descriptor indices in LDT */
 #define INDEX_LDT_C             0
 #define INDEX_LDT_RW            1
 
-/* æè¿°ç¬¦ç±»å‹å€¼è¯´æ˜ */
-#define	DA_32			0x4000	/* 32 ä½æ®µ				*/
-#define	DA_LIMIT_4K		0x8000	/* æ®µç•Œé™ç²’åº¦ä¸º 4K å­—èŠ‚			*/
-#define	DA_DPL0			0x00	/* DPL = 0				*/
-#define	DA_DPL1			0x20	/* DPL = 1				*/
-#define	DA_DPL2			0x40	/* DPL = 2				*/
-#define	DA_DPL3			0x60	/* DPL = 3				*/
-/* å­˜å‚¨æ®µæè¿°ç¬¦ç±»å‹å€¼è¯´æ˜ */
-#define	DA_DR			0x90	/* å­˜åœ¨çš„åªè¯»æ•°æ®æ®µç±»å‹å€¼		*/
-#define	DA_DRW			0x92	/* å­˜åœ¨çš„å¯è¯»å†™æ•°æ®æ®µå±æ€§å€¼		*/
-#define	DA_DRWA			0x93	/* å­˜åœ¨çš„å·²è®¿é—®å¯è¯»å†™æ•°æ®æ®µç±»å‹å€¼	*/
-#define	DA_C			0x98	/* å­˜åœ¨çš„åªæ‰§è¡Œä»£ç æ®µå±æ€§å€¼		*/
-#define	DA_CR			0x9A	/* å­˜åœ¨çš„å¯æ‰§è¡Œå¯è¯»ä»£ç æ®µå±æ€§å€¼		*/
-#define	DA_CCO			0x9C	/* å­˜åœ¨çš„åªæ‰§è¡Œä¸€è‡´ä»£ç æ®µå±æ€§å€¼		*/
-#define	DA_CCOR			0x9E	/* å­˜åœ¨çš„å¯æ‰§è¡Œå¯è¯»ä¸€è‡´ä»£ç æ®µå±æ€§å€¼	*/
-/* ç³»ç»Ÿæ®µæè¿°ç¬¦ç±»å‹å€¼è¯´æ˜ */
-#define	DA_LDT			0x82	/* å±€éƒ¨æè¿°ç¬¦è¡¨æ®µç±»å‹å€¼			*/
-#define	DA_TaskGate		0x85	/* ä»»åŠ¡é—¨ç±»å‹å€¼				*/
-#define	DA_386TSS		0x89	/* å¯ç”¨ 386 ä»»åŠ¡çŠ¶æ€æ®µç±»å‹å€¼		*/
-#define	DA_386CGate		0x8C	/* 386 è°ƒç”¨é—¨ç±»å‹å€¼			*/
-#define	DA_386IGate		0x8E	/* 386 ä¸­æ–­é—¨ç±»å‹å€¼			*/
-#define	DA_386TGate		0x8F	/* 386 é™·é˜±é—¨ç±»å‹å€¼			*/
+/* ÃèÊö·ûÀàĞÍÖµËµÃ÷ */
+#define DA_32           0x4000  /* 32 Î»¶Î              */
+#define DA_LIMIT_4K     0x8000  /* ¶Î½çÏŞÁ£¶ÈÎª 4K ×Ö½Ú         */
+#define DA_DPL0         0x00    /* DPL = 0              */
+#define DA_DPL1         0x20    /* DPL = 1              */
+#define DA_DPL2         0x40    /* DPL = 2              */
+#define DA_DPL3         0x60    /* DPL = 3              */
+/* ´æ´¢¶ÎÃèÊö·ûÀàĞÍÖµËµÃ÷ */
+#define DA_DR           0x90    /* ´æÔÚµÄÖ»¶ÁÊı¾İ¶ÎÀàĞÍÖµ       */
+#define DA_DRW          0x92    /* ´æÔÚµÄ¿É¶ÁĞ´Êı¾İ¶ÎÊôĞÔÖµ     */
+#define DA_DRWA         0x93    /* ´æÔÚµÄÒÑ·ÃÎÊ¿É¶ÁĞ´Êı¾İ¶ÎÀàĞÍÖµ   */
+#define DA_C            0x98    /* ´æÔÚµÄÖ»Ö´ĞĞ´úÂë¶ÎÊôĞÔÖµ     */
+#define DA_CR           0x9A    /* ´æÔÚµÄ¿ÉÖ´ĞĞ¿É¶Á´úÂë¶ÎÊôĞÔÖµ     */
+#define DA_CCO          0x9C    /* ´æÔÚµÄÖ»Ö´ĞĞÒ»ÖÂ´úÂë¶ÎÊôĞÔÖµ     */
+#define DA_CCOR         0x9E    /* ´æÔÚµÄ¿ÉÖ´ĞĞ¿É¶ÁÒ»ÖÂ´úÂë¶ÎÊôĞÔÖµ */
+/* ÏµÍ³¶ÎÃèÊö·ûÀàĞÍÖµËµÃ÷ */
+#define DA_LDT          0x82    /* ¾Ö²¿ÃèÊö·û±í¶ÎÀàĞÍÖµ         */
+#define DA_TaskGate     0x85    /* ÈÎÎñÃÅÀàĞÍÖµ             */
+#define DA_386TSS       0x89    /* ¿ÉÓÃ 386 ÈÎÎñ×´Ì¬¶ÎÀàĞÍÖµ        */
+#define DA_386CGate     0x8C    /* 386 µ÷ÓÃÃÅÀàĞÍÖµ         */
+#define DA_386IGate     0x8E    /* 386 ÖĞ¶ÏÃÅÀàĞÍÖµ         */
+#define DA_386TGate     0x8F    /* 386 ÏİÚåÃÅÀàĞÍÖµ         */
 
-/* é€‰æ‹©å­ç±»å‹å€¼è¯´æ˜ */
-/* å…¶ä¸­, SA_ : Selector Attribute */
-#define	SA_RPL_MASK	0xFFFC
-#define	SA_RPL0		0
-#define	SA_RPL1		1
-#define	SA_RPL2		2
-#define	SA_RPL3		3
+/* Ñ¡Ôñ×ÓÀàĞÍÖµËµÃ÷ */
+/* ÆäÖĞ, SA_ : Selector Attribute */
+#define SA_RPL_MASK 0xFFFC
+#define SA_RPL0     0
+#define SA_RPL1     1
+#define SA_RPL2     2
+#define SA_RPL3     3
 
-#define	SA_TI_MASK	0xFFFB
-#define	SA_TIG		0
-#define	SA_TIL		4
+#define SA_TI_MASK  0xFFFB
+#define SA_TIG      0
+#define SA_TIL      4
 
-/* ä¸­æ–­å‘é‡ */
-#define	INT_VECTOR_DIVIDE		0x0
-#define	INT_VECTOR_DEBUG		0x1
-#define	INT_VECTOR_NMI			0x2
-#define	INT_VECTOR_BREAKPOINT		0x3
-#define	INT_VECTOR_OVERFLOW		0x4
-#define	INT_VECTOR_BOUNDS		0x5
-#define	INT_VECTOR_INVAL_OP		0x6
-#define	INT_VECTOR_COPROC_NOT		0x7
-#define	INT_VECTOR_DOUBLE_FAULT		0x8
-#define	INT_VECTOR_COPROC_SEG		0x9
-#define	INT_VECTOR_INVAL_TSS		0xA
-#define	INT_VECTOR_SEG_NOT		0xB
-#define	INT_VECTOR_STACK_FAULT		0xC
-#define	INT_VECTOR_PROTECTION		0xD
-#define	INT_VECTOR_PAGE_FAULT		0xE
-#define	INT_VECTOR_COPROC_ERR		0x10
+/* ÖĞ¶ÏÏòÁ¿ */
+#define INT_VECTOR_DIVIDE       0x0
+#define INT_VECTOR_DEBUG        0x1
+#define INT_VECTOR_NMI          0x2
+#define INT_VECTOR_BREAKPOINT       0x3
+#define INT_VECTOR_OVERFLOW     0x4
+#define INT_VECTOR_BOUNDS       0x5
+#define INT_VECTOR_INVAL_OP     0x6
+#define INT_VECTOR_COPROC_NOT       0x7
+#define INT_VECTOR_DOUBLE_FAULT     0x8
+#define INT_VECTOR_COPROC_SEG       0x9
+#define INT_VECTOR_INVAL_TSS        0xA
+#define INT_VECTOR_SEG_NOT      0xB
+#define INT_VECTOR_STACK_FAULT      0xC
+#define INT_VECTOR_PROTECTION       0xD
+#define INT_VECTOR_PAGE_FAULT       0xE
+#define INT_VECTOR_COPROC_ERR       0x10
 
-/* ä¸­æ–­å‘é‡ */
-#define	INT_VECTOR_IRQ0			0x20
-#define	INT_VECTOR_IRQ8			0x28
+/* ÖĞ¶ÏÏòÁ¿ */
+#define INT_VECTOR_IRQ0         0x20
+#define INT_VECTOR_IRQ8         0x28
 
-/* ç³»ç»Ÿè°ƒç”¨ */
+/* ÏµÍ³µ÷ÓÃ */
 #define INT_VECTOR_SYS_CALL             0x90
 
-/* å® */
-/* çº¿æ€§åœ°å€ â†’ ç‰©ç†åœ°å€ */
-#define vir2phys(seg_base, vir)	(u32)(((u32)seg_base) + (u32)(vir))
+/* ºê */
+/* ÏßĞÔµØÖ· ¡ú ÎïÀíµØÖ· */
+#define vir2phys(seg_base, vir) (u32)(((u32)seg_base) + (u32)(vir))
 
 
 #endif /* _ORANGES_PROTECT_H_ */

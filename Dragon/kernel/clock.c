@@ -2,7 +2,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                                clock.c
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                                                    Forrest Yu, 2005
+                                                    PPX, 2010
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "type.h"
@@ -22,18 +22,18 @@
  *======================================================================*/
 PUBLIC void clock_handler(int irq)
 {
-	ticks++;
-	p_proc_ready->ticks--;
+    ticks++;
+    p_proc_ready->ticks--;
 
-	if (k_reenter != 0) {
-		return;
-	}
+    if (k_reenter != 0) {
+        return;
+    }
 
-	if (p_proc_ready->ticks > 0) {
-		return;
-	}
+    if (p_proc_ready->ticks > 0) {
+        return;
+    }
 
-	schedule();
+    schedule();
 
 }
 

@@ -2,8 +2,8 @@
  *****************************************************************************
  * @file   systask.c
  * @brief  
- * @author Forrest Y. Yu
- * @date   2007
+ * @author PPX
+ * @date   2010
  *****************************************************************************
  *****************************************************************************/
 
@@ -29,19 +29,19 @@
  *****************************************************************************/
 PUBLIC void task_sys()
 {
-	MESSAGE msg;
-	while (1) {
-		send_recv(RECEIVE, ANY, &msg);
-		int src = msg.source;
+    MESSAGE msg;
+    while (1) {
+        send_recv(RECEIVE, ANY, &msg);
+        int src = msg.source;
 
-		switch (msg.type) {
-		case GET_TICKS:
-			msg.RETVAL = ticks;
-			send_recv(SEND, src, &msg);
-			break;
-		default:
-			panic("unknown msg type");
-			break;
-		}
-	}
+        switch (msg.type) {
+        case GET_TICKS:
+            msg.RETVAL = ticks;
+            send_recv(SEND, src, &msg);
+            break;
+        default:
+            panic("unknown msg type");
+            break;
+        }
+    }
 }

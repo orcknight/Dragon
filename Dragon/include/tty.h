@@ -1,27 +1,27 @@
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-				tty.h
+                tty.h
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-						    Forrest Yu, 2005
+                            PPX, 2010
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #ifndef _ORANGES_TTY_H_
 #define _ORANGES_TTY_H_
 
 
-#define TTY_IN_BYTES	256	/* tty input queue size */
+#define TTY_IN_BYTES    256 /* tty input queue size */
 
 struct s_console;
 
 /* TTY */
 typedef struct s_tty
 {
-	u32	in_buf[TTY_IN_BYTES];	/* TTY è¾“å…¥ç¼“å†²åŒº */
-	u32*	p_inbuf_head;		/* æŒ‡å‘ç¼“å†²åŒºä¸­ä¸‹ä¸€ä¸ªç©ºé—²ä½ç½® */
-	u32*	p_inbuf_tail;		/* æŒ‡å‘é”®ç›˜ä»»åŠ¡åº”å¤„ç†çš„é”®å€¼ */
-	int	inbuf_count;		/* ç¼“å†²åŒºä¸­å·²ç»å¡«å……äº†å¤šå°‘ */
+    u32 in_buf[TTY_IN_BYTES];   /* TTY ÊäÈë»º³åÇø */
+    u32*    p_inbuf_head;       /* Ö¸Ïò»º³åÇøÖĞÏÂÒ»¸ö¿ÕÏĞÎ»ÖÃ */
+    u32*    p_inbuf_tail;       /* Ö¸Ïò¼üÅÌÈÎÎñÓ¦´¦ÀíµÄ¼üÖµ */
+    int inbuf_count;        /* »º³åÇøÖĞÒÑ¾­Ìî³äÁË¶àÉÙ */
 
-	struct s_console *	p_console;
+    struct s_console *  p_console;
 }TTY;
 
 

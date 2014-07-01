@@ -5,7 +5,7 @@ ENTRYPOINT	= 0x30400
 ENTRYOFFSET	= 0x400
 #programs,flags,etc.
 ASM		= nasm
-DASM	= ndisasm
+DASM		= ndisasm
 CC		= gcc
 LD		= ld
 ASMBFLAGS	= -I boot/include/

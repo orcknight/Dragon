@@ -1,15 +1,9 @@
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-			      console.c
+                  console.c
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-						    Forrest Yu, 2005
+                            PPX, 2010
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-/*
-	å›žè½¦é”®: æŠŠå…‰æ ‡ç§»åˆ°ç¬¬ä¸€åˆ—
-	æ¢è¡Œé”®: æŠŠå…‰æ ‡å‰è¿›åˆ°ä¸‹ä¸€è¡Œ
-*/
-
 
 #include "type.h"
 #include "const.h"
@@ -28,84 +22,84 @@ PRIVATE void set_video_start_addr(u32 addr);
 PRIVATE void flush(CONSOLE* p_con);
 
 /*======================================================================*
-			   init_screen
+               init_screen
  *======================================================================*/
 PUBLIC void init_screen(TTY* p_tty)
 {
-	int nr_tty = p_tty - tty_table;
-	p_tty->p_console = console_table + nr_tty;
+    int nr_tty = p_tty - tty_table;
+    p_tty->p_console = console_table + nr_tty;
 
-	int v_mem_size = V_MEM_SIZE >> 1;	/* æ˜¾å­˜æ€»å¤§å° (in WORD) */
+    int v_mem_size = V_MEM_SIZE >> 1;   /* ÏÔ´æ×Ü´óÐ¡ (in WORD) */
 
-	int con_v_mem_size                   = v_mem_size / NR_CONSOLES;
-	p_tty->p_console->original_addr      = nr_tty * con_v_mem_size;
-	p_tty->p_console->v_mem_limit        = con_v_mem_size;
-	p_tty->p_console->current_start_addr = p_tty->p_console->original_addr;
+    int con_v_mem_size                   = v_mem_size / NR_CONSOLES;
+    p_tty->p_console->original_addr      = nr_tty * con_v_mem_size;
+    p_tty->p_console->v_mem_limit        = con_v_mem_size;
+    p_tty->p_console->current_start_addr = p_tty->p_console->original_addr;
 
-	/* é»˜è®¤å…‰æ ‡ä½ç½®åœ¨æœ€å¼€å§‹å¤„ */
-	p_tty->p_console->cursor = p_tty->p_console->original_addr;
+    /* Ä¬ÈÏ¹â±êÎ»ÖÃÔÚ×î¿ªÊ¼´¦ */
+    p_tty->p_console->cursor = p_tty->p_console->original_addr;
 
-	if (nr_tty == 0) {
-		/* ç¬¬ä¸€ä¸ªæŽ§åˆ¶å°æ²¿ç”¨åŽŸæ¥çš„å…‰æ ‡ä½ç½® */
-		p_tty->p_console->cursor = disp_pos / 2;
-		disp_pos = 0;
-	}
-	else {
-		out_char(p_tty->p_console, nr_tty + '0');
-		out_char(p_tty->p_console, '#');
-	}
+    if (nr_tty == 0) {
+        /* µÚÒ»¸ö¿ØÖÆÌ¨ÑØÓÃÔ­À´µÄ¹â±êÎ»ÖÃ */
+        p_tty->p_console->cursor = disp_pos / 2;
+        disp_pos = 0;
+    }
+    else {
+        out_char(p_tty->p_console, nr_tty + '0');
+        out_char(p_tty->p_console, '#');
+    }
 
-	set_cursor(p_tty->p_console->cursor);
+    set_cursor(p_tty->p_console->cursor);
 }
 
 
 /*======================================================================*
-			   is_current_console
+               is_current_console
 *======================================================================*/
 PUBLIC int is_current_console(CONSOLE* p_con)
 {
-	return (p_con == &console_table[nr_current_console]);
+    return (p_con == &console_table[nr_current_console]);
 }
 
 
 /*======================================================================*
-			   out_char
+               out_char
  *======================================================================*/
 PUBLIC void out_char(CONSOLE* p_con, char ch)
 {
-	u8* p_vmem = (u8*)(V_MEM_BASE + p_con->cursor * 2);
+    u8* p_vmem = (u8*)(V_MEM_BASE + p_con->cursor * 2);
 
-	switch(ch) {
-	case '\n':
-		if (p_con->cursor < p_con->original_addr +
-		    p_con->v_mem_limit - SCR_WIDTH) {
-			p_con->cursor = p_con->original_addr + SCR_WIDTH * 
-				((p_con->cursor - p_con->original_addr) /
-				 SCR_WIDTH + 1);
-		}
-		break;
-	case '\b':
-		if (p_con->cursor > p_con->original_addr) {
-			p_con->cursor--;
-			*(p_vmem-2) = ' ';
-			*(p_vmem-1) = DEFAULT_CHAR_COLOR;
-		}
-		break;
-	default:
-		if (p_con->cursor <
-		    p_con->original_addr + p_con->v_mem_limit - 1) {
-			*p_vmem++ = ch;
-			*p_vmem++ = DEFAULT_CHAR_COLOR;
-			p_con->cursor++;
-		}
-		break;
-	}
+    switch(ch) {
+    case '\n':
+        if (p_con->cursor < p_con->original_addr +
+            p_con->v_mem_limit - SCR_WIDTH) {
+            p_con->cursor = p_con->original_addr + SCR_WIDTH * 
+                ((p_con->cursor - p_con->original_addr) /
+                 SCR_WIDTH + 1);
+        }
+        break;
+    case '\b':
+        if (p_con->cursor > p_con->original_addr) {
+            p_con->cursor--;
+            *(p_vmem-2) = ' ';
+            *(p_vmem-1) = DEFAULT_CHAR_COLOR;
+        }
+        break;
+    default:
+        if (p_con->cursor <
+            p_con->original_addr + p_con->v_mem_limit - 1) {
+            *p_vmem++ = ch;
+            *p_vmem++ = DEFAULT_CHAR_COLOR;
+            p_con->cursor++;
+        }
+        break;
+    }
 
-	while (p_con->cursor >= p_con->current_start_addr + SCR_SIZE) {
-		scroll_screen(p_con, SCR_DN);
-	}
+    while (p_con->cursor >= p_con->current_start_addr + SCR_SIZE) {
+        scroll_screen(p_con, SCR_DN);
+    }
 
-	flush(p_con);
+    flush(p_con);
 }
 
 /*======================================================================*
@@ -113,80 +107,80 @@ PUBLIC void out_char(CONSOLE* p_con, char ch)
 *======================================================================*/
 PRIVATE void flush(CONSOLE* p_con)
 {
-	if (is_current_console(p_con)) {
-		set_cursor(p_con->cursor);
-		set_video_start_addr(p_con->current_start_addr);
-	}
+    if (is_current_console(p_con)) {
+        set_cursor(p_con->cursor);
+        set_video_start_addr(p_con->current_start_addr);
+    }
 }
 
 /*======================================================================*
-			    set_cursor
+                set_cursor
  *======================================================================*/
 PRIVATE void set_cursor(unsigned int position)
 {
-	disable_int();
-	out_byte(CRTC_ADDR_REG, CURSOR_H);
-	out_byte(CRTC_DATA_REG, (position >> 8) & 0xFF);
-	out_byte(CRTC_ADDR_REG, CURSOR_L);
-	out_byte(CRTC_DATA_REG, position & 0xFF);
-	enable_int();
+    disable_int();
+    out_byte(CRTC_ADDR_REG, CURSOR_H);
+    out_byte(CRTC_DATA_REG, (position >> 8) & 0xFF);
+    out_byte(CRTC_ADDR_REG, CURSOR_L);
+    out_byte(CRTC_DATA_REG, position & 0xFF);
+    enable_int();
 }
 
 /*======================================================================*
-			  set_video_start_addr
+              set_video_start_addr
  *======================================================================*/
 PRIVATE void set_video_start_addr(u32 addr)
 {
-	disable_int();
-	out_byte(CRTC_ADDR_REG, START_ADDR_H);
-	out_byte(CRTC_DATA_REG, (addr >> 8) & 0xFF);
-	out_byte(CRTC_ADDR_REG, START_ADDR_L);
-	out_byte(CRTC_DATA_REG, addr & 0xFF);
-	enable_int();
+    disable_int();
+    out_byte(CRTC_ADDR_REG, START_ADDR_H);
+    out_byte(CRTC_DATA_REG, (addr >> 8) & 0xFF);
+    out_byte(CRTC_ADDR_REG, START_ADDR_L);
+    out_byte(CRTC_DATA_REG, addr & 0xFF);
+    enable_int();
 }
 
 
 
 /*======================================================================*
-			   select_console
+               select_console
  *======================================================================*/
-PUBLIC void select_console(int nr_console)	/* 0 ~ (NR_CONSOLES - 1) */
+PUBLIC void select_console(int nr_console)  /* 0 ~ (NR_CONSOLES - 1) */
 {
-	if ((nr_console < 0) || (nr_console >= NR_CONSOLES)) {
-		return;
-	}
+    if ((nr_console < 0) || (nr_console >= NR_CONSOLES)) {
+        return;
+    }
 
-	nr_current_console = nr_console;
+    nr_current_console = nr_console;
 
-	flush(&console_table[nr_console]);
+    flush(&console_table[nr_console]);
 }
 
 /*======================================================================*
-			   scroll_screen
+               scroll_screen
  *----------------------------------------------------------------------*
- æ»šå±.
+ ¹öÆÁ.
  *----------------------------------------------------------------------*
  direction:
-	SCR_UP	: å‘ä¸Šæ»šå±
-	SCR_DN	: å‘ä¸‹æ»šå±
-	å…¶å®ƒ	: ä¸åšå¤„ç†
+    SCR_UP  : ÏòÉÏ¹öÆÁ
+    SCR_DN  : ÏòÏÂ¹öÆÁ
+    ÆäËü  : ²»×ö´¦Àí
  *======================================================================*/
 PUBLIC void scroll_screen(CONSOLE* p_con, int direction)
 {
-	if (direction == SCR_UP) {
-		if (p_con->current_start_addr > p_con->original_addr) {
-			p_con->current_start_addr -= SCR_WIDTH;
-		}
-	}
-	else if (direction == SCR_DN) {
-		if (p_con->current_start_addr + SCR_SIZE <
-		    p_con->original_addr + p_con->v_mem_limit) {
-			p_con->current_start_addr += SCR_WIDTH;
-		}
-	}
-	else{
-	}
+    if (direction == SCR_UP) {
+        if (p_con->current_start_addr > p_con->original_addr) {
+            p_con->current_start_addr -= SCR_WIDTH;
+        }
+    }
+    else if (direction == SCR_DN) {
+        if (p_con->current_start_addr + SCR_SIZE <
+            p_con->original_addr + p_con->v_mem_limit) {
+            p_con->current_start_addr += SCR_WIDTH;
+        }
+    }
+    else{
+    }
 
-	flush(p_con);
+    flush(p_con);
 }
 

@@ -2,7 +2,7 @@
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                             start.c
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                                                    Forrest Yu, 2005
+                                                    PPX, 2010
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "type.h"
@@ -22,26 +22,26 @@
  *======================================================================*/
 PUBLIC void cstart()
 {
-	disp_str("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n-----\"cstart\" begins-----\n");
+    disp_str("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n-----\"cstart\" begins-----\n");
 
-	/* å°† LOADER ä¸­çš„ GDT å¤åˆ¶åˆ°æ–°çš„ GDT ä¸­ */
-	memcpy(	&gdt,				   /* New GDT */
-		(void*)(*((u32*)(&gdt_ptr[2]))),   /* Base  of Old GDT */
-		*((u16*)(&gdt_ptr[0])) + 1	   /* Limit of Old GDT */
-		);
-	/* gdt_ptr[6] å…± 6 ä¸ªå­—èŠ‚ï¼š0~15:Limit  16~47:Baseã€‚ç”¨ä½œ sgdt ä»¥åŠ lgdt çš„å‚æ•°ã€‚ */
-	u16* p_gdt_limit = (u16*)(&gdt_ptr[0]);
-	u32* p_gdt_base  = (u32*)(&gdt_ptr[2]);
-	*p_gdt_limit = GDT_SIZE * sizeof(struct descriptor) - 1;
-	*p_gdt_base  = (u32)&gdt;
+    /* ½« LOADER ÖĞµÄ GDT ¸´ÖÆµ½ĞÂµÄ GDT ÖĞ */
+    memcpy( &gdt,                  /* New GDT */
+        (void*)(*((u32*)(&gdt_ptr[2]))),   /* Base  of Old GDT */
+        *((u16*)(&gdt_ptr[0])) + 1     /* Limit of Old GDT */
+        );
+    /* gdt_ptr[6] ¹² 6 ¸ö×Ö½Ú£º0~15:Limit  16~47:Base¡£ÓÃ×÷ sgdt ÒÔ¼° lgdt µÄ²ÎÊı¡£ */
+    u16* p_gdt_limit = (u16*)(&gdt_ptr[0]);
+    u32* p_gdt_base  = (u32*)(&gdt_ptr[2]);
+    *p_gdt_limit = GDT_SIZE * sizeof(struct descriptor) - 1;
+    *p_gdt_base  = (u32)&gdt;
 
-	/* idt_ptr[6] å…± 6 ä¸ªå­—èŠ‚ï¼š0~15:Limit  16~47:Baseã€‚ç”¨ä½œ sidt ä»¥åŠ lidt çš„å‚æ•°ã€‚ */
-	u16* p_idt_limit = (u16*)(&idt_ptr[0]);
-	u32* p_idt_base  = (u32*)(&idt_ptr[2]);
-	*p_idt_limit = IDT_SIZE * sizeof(struct gate) - 1;
-	*p_idt_base  = (u32)&idt;
+    /* idt_ptr[6] ¹² 6 ¸ö×Ö½Ú£º0~15:Limit  16~47:Base¡£ÓÃ×÷ sidt ÒÔ¼° lidt µÄ²ÎÊı¡£ */
+    u16* p_idt_limit = (u16*)(&idt_ptr[0]);
+    u32* p_idt_base  = (u32*)(&idt_ptr[2]);
+    *p_idt_limit = IDT_SIZE * sizeof(struct gate) - 1;
+    *p_idt_base  = (u32)&idt;
 
-	init_prot();
+    init_prot();
 
-	disp_str("-----\"cstart\" finished-----\n");
+    disp_str("-----\"cstart\" finished-----\n");
 }

@@ -2,324 +2,324 @@
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;                               kernel.asm
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-;                                                     Forrest Yu, 2005
+;                                                     PPX, 2010
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 %include "sconst.inc"
 
-; å¯¼å…¥å‡½æ•°
-extern	cstart
-extern	kernel_main
-extern	exception_handler
-extern	spurious_irq
-extern	clock_handler
-extern	disp_str
-extern	delay
-extern	irq_table
+; µ¼Èëº¯Êı
+extern  cstart
+extern  kernel_main
+extern  exception_handler
+extern  spurious_irq
+extern  clock_handler
+extern  disp_str
+extern  delay
+extern  irq_table
 
-; å¯¼å…¥å…¨å±€å˜é‡
-extern	gdt_ptr
-extern	idt_ptr
-extern	p_proc_ready
-extern	tss
-extern	disp_pos
-extern	k_reenter
-extern	sys_call_table
+; µ¼ÈëÈ«¾Ö±äÁ¿
+extern  gdt_ptr
+extern  idt_ptr
+extern  p_proc_ready
+extern  tss
+extern  disp_pos
+extern  k_reenter
+extern  sys_call_table
 
 bits 32
 
 [SECTION .data]
-clock_int_msg		db	"^", 0
+clock_int_msg           db      "^", 0
 
 [SECTION .bss]
-StackSpace		resb	2 * 1024
-StackTop:		; æ ˆé¡¶
+StackSpace              resb    2 * 1024
+StackTop:               ; Õ»¶¥
 
-[section .text]	; ä»£ç åœ¨æ­¤
+[section .text] ; ´úÂëÔÚ´Ë
 
-global _start	; å¯¼å‡º _start
+global _start   ; µ¼³ö _start
 
 global restart
 global sys_call
 
-global	divide_error
-global	single_step_exception
-global	nmi
-global	breakpoint_exception
-global	overflow
-global	bounds_check
-global	inval_opcode
-global	copr_not_available
-global	double_fault
-global	copr_seg_overrun
-global	inval_tss
-global	segment_not_present
-global	stack_exception
-global	general_protection
-global	page_fault
-global	copr_error
-global	hwint00
-global	hwint01
-global	hwint02
-global	hwint03
-global	hwint04
-global	hwint05
-global	hwint06
-global	hwint07
-global	hwint08
-global	hwint09
-global	hwint10
-global	hwint11
-global	hwint12
-global	hwint13
-global	hwint14
-global	hwint15
+global  divide_error
+global  single_step_exception
+global  nmi
+global  breakpoint_exception
+global  overflow
+global  bounds_check
+global  inval_opcode
+global  copr_not_available
+global  double_fault
+global  copr_seg_overrun
+global  inval_tss
+global  segment_not_present
+global  stack_exception
+global  general_protection
+global  page_fault
+global  copr_error
+global  hwint00
+global  hwint01
+global  hwint02
+global  hwint03
+global  hwint04
+global  hwint05
+global  hwint06
+global  hwint07
+global  hwint08
+global  hwint09
+global  hwint10
+global  hwint11
+global  hwint12
+global  hwint13
+global  hwint14
+global  hwint15
 
 
 _start:
-	; æ­¤æ—¶å†…å­˜çœ‹ä¸Šå»æ˜¯è¿™æ ·çš„ï¼ˆæ›´è¯¦ç»†çš„å†…å­˜æƒ…å†µåœ¨ LOADER.ASM ä¸­æœ‰è¯´æ˜ï¼‰ï¼š
-	;              â”ƒ                                    â”ƒ
-	;              â”ƒ                 ...                â”ƒ
-	;              â”£â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”«
-	;              â”ƒâ– â– â– â– â– â– Page  Tablesâ– â– â– â– â– â– â”ƒ
-	;              â”ƒâ– â– â– â– â– (å¤§å°ç”±LOADERå†³å®š)â– â– â– â– â”ƒ PageTblBase
-	;    00101000h â”£â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”«
-	;              â”ƒâ– â– â– â– Page Directory Tableâ– â– â– â– â”ƒ PageDirBase = 1M
-	;    00100000h â”£â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”«
-	;              â”ƒâ–¡â–¡â–¡â–¡ Hardware  Reserved â–¡â–¡â–¡â–¡â”ƒ B8000h â† gs
-	;       9FC00h â”£â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”«
-	;              â”ƒâ– â– â– â– â– â– â– LOADER.BINâ– â– â– â– â– â– â”ƒ somewhere in LOADER â† esp
-	;       90000h â”£â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”«
-	;              â”ƒâ– â– â– â– â– â– â– KERNEL.BINâ– â– â– â– â– â– â”ƒ
-	;       80000h â”£â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”«
-	;              â”ƒâ– â– â– â– â– â– â– â– KERNELâ– â– â– â– â– â– â– â”ƒ 30400h â† KERNEL å…¥å£ (KernelEntryPointPhyAddr)
-	;       30000h â”£â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”«
-	;              â”‹                 ...                â”‹
-	;              â”‹                                    â”‹
-	;           0h â”—â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”› â† cs, ds, es, fs, ss
-	;
-	;
-	; GDT ä»¥åŠç›¸åº”çš„æè¿°ç¬¦æ˜¯è¿™æ ·çš„ï¼š
-	;
-	;		              Descriptors               Selectors
-	;              â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”“
-	;              â”ƒ         Dummy Descriptor           â”ƒ
-	;              â”£â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”«
-	;              â”ƒ         DESC_FLAT_C    (0ï½4G)     â”ƒ   8h = cs
-	;              â”£â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”«
-	;              â”ƒ         DESC_FLAT_RW   (0ï½4G)     â”ƒ  10h = ds, es, fs, ss
-	;              â”£â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”«
-	;              â”ƒ         DESC_VIDEO                 â”ƒ  1Bh = gs
-	;              â”—â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”›
-	;
-	; æ³¨æ„! åœ¨ä½¿ç”¨ C ä»£ç çš„æ—¶å€™ä¸€å®šè¦ä¿è¯ ds, es, ss è¿™å‡ ä¸ªæ®µå¯„å­˜å™¨çš„å€¼æ˜¯ä¸€æ ·çš„
-	; å› ä¸ºç¼–è¯‘å™¨æœ‰å¯èƒ½ç¼–è¯‘å‡ºä½¿ç”¨å®ƒä»¬çš„ä»£ç , è€Œç¼–è¯‘å™¨é»˜è®¤å®ƒä»¬æ˜¯ä¸€æ ·çš„. æ¯”å¦‚ä¸²æ‹·è´æ“ä½œä¼šç”¨åˆ° ds å’Œ es.
-	;
-	;
+        ; ´ËÊ±ÄÚ´æ¿´ÉÏÈ¥ÊÇÕâÑùµÄ£¨¸üÏêÏ¸µÄÄÚ´æÇé¿öÔÚ LOADER.ASM ÖĞÓĞËµÃ÷£©£º
+        ;              ©§                                    ©§
+        ;              ©§                 ...                ©§
+        ;              ©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï
+        ;              ©§¡ö¡ö¡ö¡ö¡ö¡öPage  Tables¡ö¡ö¡ö¡ö¡ö¡ö©§
+        ;              ©§¡ö¡ö¡ö¡ö¡ö(´óĞ¡ÓÉLOADER¾ö¶¨)¡ö¡ö¡ö¡ö©§ PageTblBase
+        ;    00101000h ©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï
+        ;              ©§¡ö¡ö¡ö¡öPage Directory Table¡ö¡ö¡ö¡ö©§ PageDirBase = 1M
+        ;    00100000h ©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï
+        ;              ©§¡õ¡õ¡õ¡õ Hardware  Reserved ¡õ¡õ¡õ¡õ©§ B8000h ¡û gs
+        ;       9FC00h ©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï
+        ;              ©§¡ö¡ö¡ö¡ö¡ö¡ö¡öLOADER.BIN¡ö¡ö¡ö¡ö¡ö¡ö©§ somewhere in LOADER ¡û esp
+        ;       90000h ©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï
+        ;              ©§¡ö¡ö¡ö¡ö¡ö¡ö¡öKERNEL.BIN¡ö¡ö¡ö¡ö¡ö¡ö©§
+        ;       80000h ©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï
+        ;              ©§¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡öKERNEL¡ö¡ö¡ö¡ö¡ö¡ö¡ö©§ 30400h ¡û KERNEL Èë¿Ú (KernelEntryPointPhyAddr)
+        ;       30000h ©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï
+        ;              ©¯                 ...                ©¯
+        ;              ©¯                                    ©¯
+        ;           0h ©»©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¿ ¡û cs, ds, es, fs, ss
+        ;
+        ;
+        ; GDT ÒÔ¼°ÏàÓ¦µÄÃèÊö·ûÊÇÕâÑùµÄ£º
+        ;
+        ;                             Descriptors               Selectors
+        ;              ©³©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©·
+        ;              ©§         Dummy Descriptor           ©§
+        ;              ©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï
+        ;              ©§         DESC_FLAT_C    (0¡«4G)     ©§   8h = cs
+        ;              ©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï
+        ;              ©§         DESC_FLAT_RW   (0¡«4G)     ©§  10h = ds, es, fs, ss
+        ;              ©Ç©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©Ï
+        ;              ©§         DESC_VIDEO                 ©§  1Bh = gs
+        ;              ©»©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¿
+        ;
+        ; ×¢Òâ! ÔÚÊ¹ÓÃ C ´úÂëµÄÊ±ºòÒ»¶¨Òª±£Ö¤ ds, es, ss Õâ¼¸¸ö¶Î¼Ä´æÆ÷µÄÖµÊÇÒ»ÑùµÄ
+        ; ÒòÎª±àÒëÆ÷ÓĞ¿ÉÄÜ±àÒë³öÊ¹ÓÃËüÃÇµÄ´úÂë, ¶ø±àÒëÆ÷Ä¬ÈÏËüÃÇÊÇÒ»ÑùµÄ. ±ÈÈç´®¿½±´²Ù×÷»áÓÃµ½ ds ºÍ es.
+        ;
+        ;
 
 
-	; æŠŠ esp ä» LOADER æŒªåˆ° KERNEL
-	mov	esp, StackTop	; å †æ ˆåœ¨ bss æ®µä¸­
+        ; °Ñ esp ´Ó LOADER Å²µ½ KERNEL
+        mov     esp, StackTop   ; ¶ÑÕ»ÔÚ bss ¶ÎÖĞ
 
-	mov	dword [disp_pos], 0
+        mov     dword [disp_pos], 0
 
-	sgdt	[gdt_ptr]	; cstart() ä¸­å°†ä¼šç”¨åˆ° gdt_ptr
-	call	cstart		; åœ¨æ­¤å‡½æ•°ä¸­æ”¹å˜äº†gdt_ptrï¼Œè®©å®ƒæŒ‡å‘æ–°çš„GDT
-	lgdt	[gdt_ptr]	; ä½¿ç”¨æ–°çš„GDT
+        sgdt    [gdt_ptr]       ; cstart() ÖĞ½«»áÓÃµ½ gdt_ptr
+        call    cstart          ; ÔÚ´Ëº¯ÊıÖĞ¸Ä±äÁËgdt_ptr£¬ÈÃËüÖ¸ÏòĞÂµÄGDT
+        lgdt    [gdt_ptr]       ; Ê¹ÓÃĞÂµÄGDT
 
-	lidt	[idt_ptr]
+        lidt    [idt_ptr]
 
-	jmp	SELECTOR_KERNEL_CS:csinit
-csinit:		; â€œè¿™ä¸ªè·³è½¬æŒ‡ä»¤å¼ºåˆ¶ä½¿ç”¨åˆšåˆšåˆå§‹åŒ–çš„ç»“æ„â€â€”â€”<<OS:D&I 2nd>> P90.
+        jmp     SELECTOR_KERNEL_CS:csinit
+csinit:         ; ¡°Õâ¸öÌø×ªÖ¸ÁîÇ¿ÖÆÊ¹ÓÃ¸Õ¸Õ³õÊ¼»¯µÄ½á¹¹¡±¡ª¡ª<<OS:D&I 2nd>> P90.
 
-	;jmp 0x40:0
-	;ud2
-
-
-	xor	eax, eax
-	mov	ax, SELECTOR_TSS
-	ltr	ax
-
-	;sti
-	jmp	kernel_main
-
-	;hlt
+        ;jmp 0x40:0
+        ;ud2
 
 
-; ä¸­æ–­å’Œå¼‚å¸¸ -- ç¡¬ä»¶ä¸­æ–­
+        xor     eax, eax
+        mov     ax, SELECTOR_TSS
+        ltr     ax
+
+        ;sti
+        jmp     kernel_main
+
+        ;hlt
+
+
+; ÖĞ¶ÏºÍÒì³£ -- Ó²¼şÖĞ¶Ï
 ; ---------------------------------
-%macro	hwint_master	1
-	call	save
-	in	al, INT_M_CTLMASK	; `.
-	or	al, (1 << %1)		;  | å±è”½å½“å‰ä¸­æ–­
-	out	INT_M_CTLMASK, al	; /
-	mov	al, EOI			; `. ç½®EOIä½
-	out	INT_M_CTL, al		; /
-	sti	; CPUåœ¨å“åº”ä¸­æ–­çš„è¿‡ç¨‹ä¸­ä¼šè‡ªåŠ¨å…³ä¸­æ–­ï¼Œè¿™å¥ä¹‹åå°±å…è®¸å“åº”æ–°çš„ä¸­æ–­
-	push	%1			; `.
-	call	[irq_table + 4 * %1]	;  | ä¸­æ–­å¤„ç†ç¨‹åº
-	pop	ecx			; /
-	cli
-	in	al, INT_M_CTLMASK	; `.
-	and	al, ~(1 << %1)		;  | æ¢å¤æ¥å—å½“å‰ä¸­æ–­
-	out	INT_M_CTLMASK, al	; /
-	ret
+%macro  hwint_master    1
+        call    save
+        in      al, INT_M_CTLMASK       ; `.
+        or      al, (1 << %1)           ;  | ÆÁ±Îµ±Ç°ÖĞ¶Ï
+        out     INT_M_CTLMASK, al       ; /
+        mov     al, EOI                 ; `. ÖÃEOIÎ»
+        out     INT_M_CTL, al           ; /
+        sti     ; CPUÔÚÏìÓ¦ÖĞ¶ÏµÄ¹ı³ÌÖĞ»á×Ô¶¯¹ØÖĞ¶Ï£¬Õâ¾äÖ®ºó¾ÍÔÊĞíÏìÓ¦ĞÂµÄÖĞ¶Ï
+        push    %1                      ; `.
+        call    [irq_table + 4 * %1]    ;  | ÖĞ¶Ï´¦Àí³ÌĞò
+        pop     ecx                     ; /
+        cli
+        in      al, INT_M_CTLMASK       ; `.
+        and     al, ~(1 << %1)          ;  | »Ö¸´½ÓÊÜµ±Ç°ÖĞ¶Ï
+        out     INT_M_CTLMASK, al       ; /
+        ret
 %endmacro
 
 
-ALIGN	16
-hwint00:		; Interrupt routine for irq 0 (the clock).
-	hwint_master	0
+ALIGN   16
+hwint00:                ; Interrupt routine for irq 0 (the clock).
+        hwint_master    0
 
-ALIGN	16
-hwint01:		; Interrupt routine for irq 1 (keyboard)
-	hwint_master	1
+ALIGN   16
+hwint01:                ; Interrupt routine for irq 1 (keyboard)
+        hwint_master    1
 
-ALIGN	16
-hwint02:		; Interrupt routine for irq 2 (cascade!)
-	hwint_master	2
+ALIGN   16
+hwint02:                ; Interrupt routine for irq 2 (cascade!)
+        hwint_master    2
 
-ALIGN	16
-hwint03:		; Interrupt routine for irq 3 (second serial)
-	hwint_master	3
+ALIGN   16
+hwint03:                ; Interrupt routine for irq 3 (second serial)
+        hwint_master    3
 
-ALIGN	16
-hwint04:		; Interrupt routine for irq 4 (first serial)
-	hwint_master	4
+ALIGN   16
+hwint04:                ; Interrupt routine for irq 4 (first serial)
+        hwint_master    4
 
-ALIGN	16
-hwint05:		; Interrupt routine for irq 5 (XT winchester)
-	hwint_master	5
+ALIGN   16
+hwint05:                ; Interrupt routine for irq 5 (XT winchester)
+        hwint_master    5
 
-ALIGN	16
-hwint06:		; Interrupt routine for irq 6 (floppy)
-	hwint_master	6
+ALIGN   16
+hwint06:                ; Interrupt routine for irq 6 (floppy)
+        hwint_master    6
 
-ALIGN	16
-hwint07:		; Interrupt routine for irq 7 (printer)
-	hwint_master	7
+ALIGN   16
+hwint07:                ; Interrupt routine for irq 7 (printer)
+        hwint_master    7
 
 ; ---------------------------------
-%macro	hwint_slave	1
-	call	save
-	in	al, INT_S_CTLMASK	; `.
-	or	al, (1 << (%1 - 8))	;  | å±è”½å½“å‰ä¸­æ–­
-	out	INT_S_CTLMASK, al	; /
-	mov	al, EOI			; `. ç½®EOIä½(master)
-	out	INT_M_CTL, al		; /
-	nop				; `. ç½®EOIä½(slave)
-	out	INT_S_CTL, al		; /  ä¸€å®šæ³¨æ„ï¼šslaveå’Œmasteréƒ½è¦ç½®EOI
-	sti	; CPUåœ¨å“åº”ä¸­æ–­çš„è¿‡ç¨‹ä¸­ä¼šè‡ªåŠ¨å…³ä¸­æ–­ï¼Œè¿™å¥ä¹‹åå°±å…è®¸å“åº”æ–°çš„ä¸­æ–­
-	push	%1			; `.
-	call	[irq_table + 4 * %1]	;  | ä¸­æ–­å¤„ç†ç¨‹åº
-	pop	ecx			; /
-	cli
-	in	al, INT_S_CTLMASK	; `.
-	and	al, ~(1 << (%1 - 8))	;  | æ¢å¤æ¥å—å½“å‰ä¸­æ–­
-	out	INT_S_CTLMASK, al	; /
-	ret
+%macro  hwint_slave     1
+        call    save
+        in      al, INT_S_CTLMASK       ; `.
+        or      al, (1 << (%1 - 8))     ;  | ÆÁ±Îµ±Ç°ÖĞ¶Ï
+        out     INT_S_CTLMASK, al       ; /
+        mov     al, EOI                 ; `. ÖÃEOIÎ»(master)
+        out     INT_M_CTL, al           ; /
+        nop                             ; `. ÖÃEOIÎ»(slave)
+        out     INT_S_CTL, al           ; /  Ò»¶¨×¢Òâ£ºslaveºÍmaster¶¼ÒªÖÃEOI
+        sti     ; CPUÔÚÏìÓ¦ÖĞ¶ÏµÄ¹ı³ÌÖĞ»á×Ô¶¯¹ØÖĞ¶Ï£¬Õâ¾äÖ®ºó¾ÍÔÊĞíÏìÓ¦ĞÂµÄÖĞ¶Ï
+        push    %1                      ; `.
+        call    [irq_table + 4 * %1]    ;  | ÖĞ¶Ï´¦Àí³ÌĞò
+        pop     ecx                     ; /
+        cli
+        in      al, INT_S_CTLMASK       ; `.
+        and     al, ~(1 << (%1 - 8))    ;  | »Ö¸´½ÓÊÜµ±Ç°ÖĞ¶Ï
+        out     INT_S_CTLMASK, al       ; /
+        ret
 %endmacro
 ; ---------------------------------
 
-ALIGN	16
-hwint08:		; Interrupt routine for irq 8 (realtime clock).
-	hwint_slave	8
+ALIGN   16
+hwint08:                ; Interrupt routine for irq 8 (realtime clock).
+        hwint_slave     8
 
-ALIGN	16
-hwint09:		; Interrupt routine for irq 9 (irq 2 redirected)
-	hwint_slave	9
+ALIGN   16
+hwint09:                ; Interrupt routine for irq 9 (irq 2 redirected)
+        hwint_slave     9
 
-ALIGN	16
-hwint10:		; Interrupt routine for irq 10
-	hwint_slave	10
+ALIGN   16
+hwint10:                ; Interrupt routine for irq 10
+        hwint_slave     10
 
-ALIGN	16
-hwint11:		; Interrupt routine for irq 11
-	hwint_slave	11
+ALIGN   16
+hwint11:                ; Interrupt routine for irq 11
+        hwint_slave     11
 
-ALIGN	16
-hwint12:		; Interrupt routine for irq 12
-	hwint_slave	12
+ALIGN   16
+hwint12:                ; Interrupt routine for irq 12
+        hwint_slave     12
 
-ALIGN	16
-hwint13:		; Interrupt routine for irq 13 (FPU exception)
-	hwint_slave	13
+ALIGN   16
+hwint13:                ; Interrupt routine for irq 13 (FPU exception)
+        hwint_slave     13
 
-ALIGN	16
-hwint14:		; Interrupt routine for irq 14 (AT winchester)
-	hwint_slave	14
+ALIGN   16
+hwint14:                ; Interrupt routine for irq 14 (AT winchester)
+        hwint_slave     14
 
-ALIGN	16
-hwint15:		; Interrupt routine for irq 15
-	hwint_slave	15
+ALIGN   16
+hwint15:                ; Interrupt routine for irq 15
+        hwint_slave     15
 
 
 
-; ä¸­æ–­å’Œå¼‚å¸¸ -- å¼‚å¸¸
+; ÖĞ¶ÏºÍÒì³£ -- Òì³£
 divide_error:
-	push	0xFFFFFFFF	; no err code
-	push	0		; vector_no	= 0
-	jmp	exception
+        push    0xFFFFFFFF      ; no err code
+        push    0               ; vector_no     = 0
+        jmp     exception
 single_step_exception:
-	push	0xFFFFFFFF	; no err code
-	push	1		; vector_no	= 1
-	jmp	exception
+        push    0xFFFFFFFF      ; no err code
+        push    1               ; vector_no     = 1
+        jmp     exception
 nmi:
-	push	0xFFFFFFFF	; no err code
-	push	2		; vector_no	= 2
-	jmp	exception
+        push    0xFFFFFFFF      ; no err code
+        push    2               ; vector_no     = 2
+        jmp     exception
 breakpoint_exception:
-	push	0xFFFFFFFF	; no err code
-	push	3		; vector_no	= 3
-	jmp	exception
+        push    0xFFFFFFFF      ; no err code
+        push    3               ; vector_no     = 3
+        jmp     exception
 overflow:
-	push	0xFFFFFFFF	; no err code
-	push	4		; vector_no	= 4
-	jmp	exception
+        push    0xFFFFFFFF      ; no err code
+        push    4               ; vector_no     = 4
+        jmp     exception
 bounds_check:
-	push	0xFFFFFFFF	; no err code
-	push	5		; vector_no	= 5
-	jmp	exception
+        push    0xFFFFFFFF      ; no err code
+        push    5               ; vector_no     = 5
+        jmp     exception
 inval_opcode:
-	push	0xFFFFFFFF	; no err code
-	push	6		; vector_no	= 6
-	jmp	exception
+        push    0xFFFFFFFF      ; no err code
+        push    6               ; vector_no     = 6
+        jmp     exception
 copr_not_available:
-	push	0xFFFFFFFF	; no err code
-	push	7		; vector_no	= 7
-	jmp	exception
+        push    0xFFFFFFFF      ; no err code
+        push    7               ; vector_no     = 7
+        jmp     exception
 double_fault:
-	push	8		; vector_no	= 8
-	jmp	exception
+        push    8               ; vector_no     = 8
+        jmp     exception
 copr_seg_overrun:
-	push	0xFFFFFFFF	; no err code
-	push	9		; vector_no	= 9
-	jmp	exception
+        push    0xFFFFFFFF      ; no err code
+        push    9               ; vector_no     = 9
+        jmp     exception
 inval_tss:
-	push	10		; vector_no	= A
-	jmp	exception
+        push    10              ; vector_no     = A
+        jmp     exception
 segment_not_present:
-	push	11		; vector_no	= B
-	jmp	exception
+        push    11              ; vector_no     = B
+        jmp     exception
 stack_exception:
-	push	12		; vector_no	= C
-	jmp	exception
+        push    12              ; vector_no     = C
+        jmp     exception
 general_protection:
-	push	13		; vector_no	= D
-	jmp	exception
+        push    13              ; vector_no     = D
+        jmp     exception
 page_fault:
-	push	14		; vector_no	= E
-	jmp	exception
+        push    14              ; vector_no     = E
+        jmp     exception
 copr_error:
-	push	0xFFFFFFFF	; no err code
-	push	16		; vector_no	= 10h
-	jmp	exception
+        push    0xFFFFFFFF      ; no err code
+        push    16              ; vector_no     = 10h
+        jmp     exception
 
 exception:
-	call	exception_handler
-	add	esp, 4*2	; è®©æ ˆé¡¶æŒ‡å‘ EIPï¼Œå †æ ˆä¸­ä»é¡¶å‘ä¸‹ä¾æ¬¡æ˜¯ï¼šEIPã€CSã€EFLAGS
-	hlt
+        call    exception_handler
+        add     esp, 4*2        ; ÈÃÕ»¶¥Ö¸Ïò EIP£¬¶ÑÕ»ÖĞ´Ó¶¥ÏòÏÂÒÀ´ÎÊÇ£ºEIP¡¢CS¡¢EFLAGS
+        hlt
 
 ; =============================================================================
 ;                                   save
@@ -327,31 +327,31 @@ exception:
 save:
         pushad          ; `.
         push    ds      ;  |
-        push    es      ;  | ä¿å­˜åŸå¯„å­˜å™¨å€¼
+        push    es      ;  | ±£´æÔ­¼Ä´æÆ÷Öµ
         push    fs      ;  |
         push    gs      ; /
 
-	;; æ³¨æ„ï¼Œä»è¿™é‡Œå¼€å§‹ï¼Œä¸€ç›´åˆ° `mov esp, StackTop'ï¼Œä¸­é—´åšå†³ä¸èƒ½ç”¨ push/pop æŒ‡ä»¤ï¼Œ
-	;; å› ä¸ºå½“å‰ esp æŒ‡å‘ proc_table é‡Œçš„æŸä¸ªä½ç½®ï¼Œpush ä¼šç ´åæ‰è¿›ç¨‹è¡¨ï¼Œå¯¼è‡´ç¾éš¾æ€§åæœï¼
+        ;; ×¢Òâ£¬´ÓÕâÀï¿ªÊ¼£¬Ò»Ö±µ½ `mov esp, StackTop'£¬ÖĞ¼ä¼á¾ö²»ÄÜÓÃ push/pop Ö¸Áî£¬
+        ;; ÒòÎªµ±Ç° esp Ö¸Ïò proc_table ÀïµÄÄ³¸öÎ»ÖÃ£¬push »áÆÆ»µµô½ø³Ì±í£¬µ¼ÖÂÔÖÄÑĞÔºó¹û£¡
 
-	mov	esi, edx	; ä¿å­˜ edxï¼Œå› ä¸º edx é‡Œä¿å­˜äº†ç³»ç»Ÿè°ƒç”¨çš„å‚æ•°
-				;ï¼ˆæ²¡ç”¨æ ˆï¼Œè€Œæ˜¯ç”¨äº†å¦ä¸€ä¸ªå¯„å­˜å™¨ esiï¼‰
-	mov	dx, ss
-	mov	ds, dx
-	mov	es, dx
-	mov	fs, dx
+        mov     esi, edx        ; ±£´æ edx£¬ÒòÎª edx Àï±£´æÁËÏµÍ³µ÷ÓÃµÄ²ÎÊı
+                                ;£¨Ã»ÓÃÕ»£¬¶øÊÇÓÃÁËÁíÒ»¸ö¼Ä´æÆ÷ esi£©
+        mov     dx, ss
+        mov     ds, dx
+        mov     es, dx
+        mov     fs, dx
 
-	mov	edx, esi	; æ¢å¤ edx
+        mov     edx, esi        ; »Ö¸´ edx
 
-        mov     esi, esp                    ;esi = è¿›ç¨‹è¡¨èµ·å§‹åœ°å€
+        mov     esi, esp                    ;esi = ½ø³Ì±íÆğÊ¼µØÖ·
 
         inc     dword [k_reenter]           ;k_reenter++;
         cmp     dword [k_reenter], 0        ;if(k_reenter ==0)
         jne     .1                          ;{
-        mov     esp, StackTop               ;  mov esp, StackTop <--åˆ‡æ¢åˆ°å†…æ ¸æ ˆ
+        mov     esp, StackTop               ;  mov esp, StackTop <--ÇĞ»»µ½ÄÚºËÕ»
         push    restart                     ;  push restart
         jmp     [esi + RETADR - P_STACKBASE];  return;
-.1:                                         ;} else { å·²ç»åœ¨å†…æ ¸æ ˆï¼Œä¸éœ€è¦å†åˆ‡æ¢
+.1:                                         ;} else { ÒÑ¾­ÔÚÄÚºËÕ»£¬²»ĞèÒªÔÙÇĞ»»
         push    restart_reenter             ;  push restart_reenter
         jmp     [esi + RETADR - P_STACKBASE];  return;
                                             ;}
@@ -364,16 +364,16 @@ sys_call:
         call    save
 
         sti
-	push	esi
+        push    esi
 
-	push	dword [p_proc_ready]
-	push	edx
-	push	ecx
-	push	ebx
+        push    dword [p_proc_ready]
+        push    edx
+        push    ecx
+        push    ebx
         call    [sys_call_table + eax * 4]
-	add	esp, 4 * 4
+        add     esp, 4 * 4
 
-	pop	esi
+        pop     esi
         mov     [esi + EAXREG - P_STACKBASE], eax
         cli
 
@@ -384,17 +384,17 @@ sys_call:
 ;                                   restart
 ; ====================================================================================
 restart:
-	mov	esp, [p_proc_ready]
-	lldt	[esp + P_LDT_SEL] 
-	lea	eax, [esp + P_STACKTOP]
-	mov	dword [tss + TSS3_S_SP0], eax
+        mov     esp, [p_proc_ready]
+        lldt    [esp + P_LDT_SEL] 
+        lea     eax, [esp + P_STACKTOP]
+        mov     dword [tss + TSS3_S_SP0], eax
 restart_reenter:
-	dec	dword [k_reenter]
-	pop	gs
-	pop	fs
-	pop	es
-	pop	ds
-	popad
-	add	esp, 4
-	iretd
+        dec     dword [k_reenter]
+        pop     gs
+        pop     fs
+        pop     es
+        pop     ds
+        popad
+        add     esp, 4
+        iretd
 

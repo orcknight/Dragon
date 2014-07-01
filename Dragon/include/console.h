@@ -1,8 +1,8 @@
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-			      console.h
+                  console.h
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-						    Forrest Yu, 2005
+                            PPX, 2010
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #ifndef _ORANGES_CONSOLE_H_
@@ -12,21 +12,21 @@
 /* CONSOLE */
 typedef struct s_console
 {
-	unsigned int	current_start_addr;	/* 褰撳墠鏄剧ず鍒颁簡浠�涔堜綅缃?  */
-	unsigned int	original_addr;		/* 褰撳墠鎺у埗鍙板搴旀樉瀛樹綅缃?*/
-	unsigned int	v_mem_limit;		/* 褰撳墠鎺у埗鍙板崰鐨勬樉瀛樺ぇ灏?*/
-	unsigned int	cursor;			/* 褰撳墠鍏夋爣浣嶇疆 */
+    unsigned int    current_start_addr; /* 当前显示到了什么位置  */
+    unsigned int    original_addr;      /* 当前控制台对应显存位置*/
+    unsigned int    v_mem_limit;        /* 当前控制台占的显存大小*/
+    unsigned int    cursor;         /* 当前光标位置 */
 }CONSOLE;
 
-#define SCR_UP	1	/* scroll forward */
-#define SCR_DN	-1	/* scroll backward */
+#define SCR_UP  1   /* scroll forward */
+#define SCR_DN  -1  /* scroll backward */
 
-#define SCR_SIZE		(80 * 25)
-#define SCR_WIDTH		80
+#define SCR_SIZE        (80 * 25)
+#define SCR_WIDTH       80
 
-#define DEFAULT_CHAR_COLOR	(MAKE_COLOR(BLACK, WHITE))
-#define GRAY_CHAR		(MAKE_COLOR(BLACK, BLACK) | BRIGHT)
-#define RED_CHAR		(MAKE_COLOR(BLUE, RED) | BRIGHT)
+#define DEFAULT_CHAR_COLOR  (MAKE_COLOR(BLACK, WHITE))
+#define GRAY_CHAR       (MAKE_COLOR(BLACK, BLACK) | BRIGHT)
+#define RED_CHAR        (MAKE_COLOR(BLUE, RED) | BRIGHT)
 
 
 #endif /* _ORANGES_CONSOLE_H_ */
