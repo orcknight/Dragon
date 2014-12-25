@@ -34,14 +34,14 @@ PUBLIC int kernel_main()
     int   i;
     int   prio;
     for (i = 0; i < NR_TASKS+NR_PROCS; i++) {
-            if (i < NR_TASKS) {     /* 浠诲姟 */
+            if (i < NR_TASKS) {     /* 任务 */
                         p_task    = task_table + i;
                         privilege = PRIVILEGE_TASK;
                         rpl       = RPL_TASK;
                         eflags    = 0x1202; /* IF=1, IOPL=1, bit 2 is always 1 */
             prio      = 15;
                 }
-                else {                  /* 鐢ㄦ埛杩涚▼ */
+                else {                  /* 用户进程 */
                         p_task    = user_proc_table + (i - NR_TASKS);
                         privilege = PRIVILEGE_USER;
                         rpl       = RPL_USER;
@@ -99,7 +99,7 @@ PUBLIC int kernel_main()
     p_proc_ready    = proc_table;
 
     init_clock();
-        init_keyboard();
+    init_keyboard();
 
     restart();
 
@@ -125,9 +125,9 @@ PUBLIC int get_ticks()
  *======================================================================*/
 void TestA()
 {
-    int fd = open("/blah",O_CREATE);
+   /* int fd = open("/blah",O_CREATE);
     printf("fd: %d\n",fd);
-    close(fd);
+    close(fd);*/
     spin("TextA");
 }
 
